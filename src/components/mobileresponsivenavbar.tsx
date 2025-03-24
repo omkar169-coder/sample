@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Menu, Bell, Wrench, Moon, Puzzle, Crown, User } from "lucide-react";
+import { Menu, Bell, Wrench, Moon, Puzzle, Crown, User, X } from "lucide-react"; // Import close icon (X)
 
 const MobileResponsiveNavbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="bg-white shadow-md">
+    <nav className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
       <div className="container mx-auto flex justify-between items-center px-4 py-3">
         {/* Logo */}
         <Image src="/wooble_logo_mini.png" alt="Company Logo" width={50} height={25} />
@@ -30,8 +30,16 @@ const MobileResponsiveNavbar: React.FC = () => {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="bg-white shadow-lg rounded-lg mt-2">
-          <div className="space-y-3 p-4">
+        <div className="fixed top-0 right-0 w-64 h-full bg-white shadow-lg z-50">
+          {/* Close Button */}
+          <button
+            onClick={() => setIsOpen(false)}
+            className="absolute top-4 right-4 text-gray-600 hover:text-blue-600 transition"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          <div className="space-y-3 p-4 mt-8">
             <button className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition">
               <Wrench className="w-5 h-5" />
               <span>Tools</span>

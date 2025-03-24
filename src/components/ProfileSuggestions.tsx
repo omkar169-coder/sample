@@ -2,61 +2,65 @@ import { useState, useEffect } from "react";
 import { UserPlus } from "lucide-react";
 
 const ProfileSuggestions = () => {
-  // Dynamic profiles data (this i will be fetched from an API in the future)
   const [profiles, setProfiles] = useState([
     { name: "Bob Smith", role: "Career Counselor" },
     { name: "Bismayadit Sahoo", role: "Btech (Mech) Student" },
   ]);
+  const [showMore, setShowMore] = useState(false);
 
-  // Simulate an API call to fetch profiles (i can replace this with a real API call)
   useEffect(() => {
     const fetchProfiles = async () => {
-      // Here i would make an API request
-    
       const fetchedProfiles = [
         { name: "Alice Johnson", role: "Software Engineer" },
         { name: "John Doe", role: "Product Manager" },
         { name: "Sarah Lee", role: "Data Scientist" },
+        { name: "Michael Brown", role: "UX Designer" },
+        { name: "Olivia White", role: "Data Analyst" },
       ];
       setProfiles(fetchedProfiles);
     };
 
     fetchProfiles();
-  }, []); // Empty dependency array means this runs once on mount
+  }, []);
+
+  const displayedProfiles = showMore ? profiles : profiles.slice(0, 3);
 
   return (
-    // <div className="bg-white shadow-md rounded-xl p-5 w-full max-w-[650px] min-h-[300px] md:min-h-[350px] lg:min-h-[300px] border border-gray-200 mx-auto sm:mr-6 mr-30"> 
-    <div className="bg-white shadow-md rounded-xl p-5 w-full max-w-[650px] min-h-[300px] md:min-h-[350px] lg:min-h-[300px] border border-gray-200 mx-auto sm:mr-6 mr-[30px] sm:max-w-[500px] md:max-w-[600px] lg:max-w-[700px] xl:max-w-[800px]">
-      {/* Title */}
-      <h2 className="text-lg font-semibold flex items-center gap-2">
-        <span role="img" aria-label="profile">👤</span> More Profiles for You
+    <div className="w-full mx-auto bg-white shadow-lg rounded-2xl p-6 mr-10 border border-gray-200 mb-20 sm:mb-8 md:mb-10 max-w-3xl">
+      <h2 className="text-sm font-semibold flex items-center gap-3 text-gray-900 mb-6">
+        <span role="img" aria-label="profile" className="text-xl">👤</span>
+        <span>More Profiles for You</span>
       </h2>
 
-      {/* Profile List */}
-      <div className="mt-4 space-y-4">
-        {profiles.map((profile, index) => (
-          <div key={index} className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gray-400 text-white flex items-center justify-center rounded-full text-lg font-medium">
-                {profile.name[0]} 
-              </div>
-              <div>
-                <p className="font-medium">{profile.name}</p>
-                <p className="text-sm text-gray-500">{profile.role}</p>
-              </div>
+      <div className="space-y-3">
+        {displayedProfiles.map((profile, index) => (
+          <div key={index} className="flex items-center justify-between space-x-2 py-1">
+            {/* Profile Image */}
+            <div className="w-10 h-10 bg-gray-400 text-white flex items-center justify-center rounded-full text-base font-medium">
+              {profile.name[0]}
             </div>
 
-            <button className="flex items-center gap-2 border px-4 py-2 rounded-full text-sm hover:bg-gray-100 transition">
-              <UserPlus size={18} />
+            {/* Profile Name and Job Role */}
+            <div className="flex-1">
+              <p className="font-semibold text-gray-800 text-sm">{profile.name}</p>
+              <p className="text-xs text-gray-600">{profile.role}</p>
+            </div>
+
+            {/* Follow Button */}
+            <button className="flex items-center gap-2 text-black px-4 py-1.5 rounded-full border border-black text-xs font-medium hover:bg-blue-300 transition">
+              <UserPlus size={16} />
               <span>Follow</span>
             </button>
           </div>
         ))}
       </div>
 
-      {/* See More Link */}
-      <div className="mt-4 text-sm text-blue-600 cursor-pointer hover:underline">
-        See More
+      {/* See More Button */}
+      <div
+        onClick={() => setShowMore(!showMore)}
+        className="mt-4 text-xs text-blue-600 cursor-pointer hover:underline text-right"
+      >
+        {showMore ? "Show Less" : "See More"}
       </div>
     </div>
   );

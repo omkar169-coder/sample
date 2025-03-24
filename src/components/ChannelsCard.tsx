@@ -3,7 +3,7 @@ import { FaRocket, FaPalette, FaCode, FaBullhorn, FaFileAlt } from "react-icons/
 
 const ChannelsCard = () => {
   return (
-    <div className="w-full max-w-xs bg-gradient-to-r from-blue-500 to-blue-400 rounded-xl shadow-md p-4">
+    <div className="w-full max-w-xs bg-gradient-to-r from-blue-500 to-blue-400 rounded-xl shadow-md p-4 ">
       
       {/* Title */}
       <h2 className="text-lg font-semibold text-white flex items-center mb-3">

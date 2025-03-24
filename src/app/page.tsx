@@ -9,12 +9,13 @@ import ChannelsCard from "@/components/ChannelsCard";
 import ProfileSuggestions from "@/components/ProfileSuggestions";
 import UpgradeCard from "@/components/UpgradeCard";
 import SearchBar from "@/components/SearchBar";
+import PostSection from "@/components/PostSection";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -24,34 +25,30 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      {/* Navbar */}
       {isMobile ? <Mobileresponsivenavbar /> : <Navbar />}
 
-      {/* Main Content */}
-      <div className="flex flex-col lg:flex-row mt-4 px-4 sm:px-8 lg:px-12 justify-between gap-6">
-        {/* Left Section */}
-        <div className="hidden lg:flex flex-col w-full max-w-[250px] space-y-4">
+      <div className="flex flex-col lg:flex-row mt-4 px-4 sm:px-6 lg:px-8 gap-3 overflow-hidden overflow-x-hidden justify-center">
+        {/* Left Column - Adjusted for Closeness */}
+        <div className="hidden lg:flex flex-col w-full max-w-[220px] space-y-3 overflow-hidden overflow-x-hidden">
           <Profilecard />
           <ImportantLinks />
           <ChannelsCard />
         </div>
 
-        {/* Center Section - Search Bar */}
-        <div className="w-full flex justify-center lg:justify-start">
-          <SearchBar />
+        {/* Middle Column */}
+        <div className="flex-grow px-2 max-w-[750px] sm:px-4 my-2 lg:my-0 overflow-hidden overflow-x-hidden">
+          <div className="mb-2">
+            <SearchBar />
+          </div>
+          <PostSection />
         </div>
 
-        {/* Right Section */}
-        <div className="hidden md:flex flex-col w-full max-w-full md:max-w-[220px] lg:max-w-[250px] space-y-4 sm:space-y-6 overflow-x-auto">
+        {/* Right Column */}
+        <div className="hidden lg:flex flex-col w-full max-w-[300px] space-y-3 overflow-hidden overflow-x-hidden">
           <ProfileSuggestions />
           <UpgradeCard />
         </div>
-
-
       </div>
-
-      {/* Dynamic Page Content */}
-      <div className="flex-grow px-4 sm:px-8">{children}</div>
     </div>
   );
 }

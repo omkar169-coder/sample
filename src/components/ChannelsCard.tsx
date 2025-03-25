@@ -5,12 +5,11 @@ const ChannelsCard = () => {
   return (
     <div className="w-full max-w-xs bg-gradient-to-r from-blue-500 to-blue-400 rounded-xl shadow-md p-4 ">
       
-      {/* Title */}
+    
       <h2 className="text-lg font-semibold text-white flex items-center mb-3">
         <span className="mr-2">⚙️</span> Channels
       </h2>
 
-      {/* Channel List */}
       <div className="space-y-3 text-white">
         {[
           { icon: <FaRocket />, name: "Startup Sphere" },

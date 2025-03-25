@@ -28,14 +28,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       {isMobile ? <Mobileresponsivenavbar /> : <Navbar />}
 
       <div className="flex flex-col lg:flex-row mt-4 px-4 sm:px-6 lg:px-8 gap-3 overflow-hidden overflow-x-hidden justify-center">
-        {/* Left Column - Adjusted for Closeness */}
+        
         <div className="hidden lg:flex flex-col w-full max-w-[220px] space-y-3 overflow-hidden overflow-x-hidden">
           <Profilecard />
           <ImportantLinks />
           <ChannelsCard />
         </div>
 
-        {/* Middle Column */}
         <div className="flex-grow px-2 max-w-[750px] sm:px-4 my-2 lg:my-0 overflow-hidden overflow-x-hidden">
           <div className="mb-2">
             <SearchBar />
@@ -43,7 +42,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <PostSection />
         </div>
 
-        {/* Right Column */}
+   
         <div className="hidden lg:flex flex-col w-full max-w-[300px] space-y-3 overflow-hidden overflow-x-hidden">
           <ProfileSuggestions />
           <UpgradeCard />

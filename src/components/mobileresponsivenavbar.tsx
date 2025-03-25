@@ -10,10 +10,10 @@ const MobileResponsiveNavbar: React.FC = () => {
   return (
     <nav className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
       <div className="container mx-auto flex justify-between items-center px-4 py-3">
-        {/* Logo */}
+        
         <Image src="/wooble_logo_mini.png" alt="Company Logo" width={50} height={25} />
 
-        {/* Icons */}
+   
         <div className="flex items-center gap-4">
           <button className="relative text-gray-600 hover:text-blue-600 transition">
             <Bell className="w-6 h-6" />
@@ -28,10 +28,10 @@ const MobileResponsiveNavbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Dropdown Menu */}
+     
       {isOpen && (
         <div className="fixed top-0 right-0 w-64 h-full bg-white shadow-lg z-50">
-          {/* Close Button */}
+         
           <button
             onClick={() => setIsOpen(false)}
             className="absolute top-4 right-4 text-gray-600 hover:text-blue-600 transition"

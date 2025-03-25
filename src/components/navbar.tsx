@@ -7,7 +7,7 @@ import Image from "next/image";
 const Navbar: React.FC = () => {
   return (
     <nav className="bg-white shadow-md">
-      <div className="max-w-full mx-auto flex justify-between items-center w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 py-3">
+      <div className="max-w-full mx-auto flex justify-evenly gap-140 items-center w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 py-3">
         
         
         <Link href="/">

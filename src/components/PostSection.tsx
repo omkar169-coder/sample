@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import TextAreaWithDialog from "@/components/TextAreaWithDialog";
 import PostButton from "@/components/PostButton";
 import PostCard from "@/components/PostCard";
+import FullPostView from "@/components/fullcardview";
 
 const PostSection = () => {
   const router = useRouter();
@@ -30,7 +31,7 @@ const PostSection = () => {
       is_liked: false,
       media: [
         {
-          media_url: "https://jpeg.org/images/jpeg-home.jpg",
+          media_url: "https://cdn.prod.website-files.com/5f7ece8a7da656e8a25402bc/6410842bd4f442a63b6d25a9_How%20to%20turn%20a%20LinkedIn%20comment%20into%20a%20post%20(1).webp",
           media_type: "image"
         }
       ]
@@ -39,8 +40,10 @@ const PostSection = () => {
 
   const [showDialog, setShowDialog] = useState(false);
   const [newPost, setNewPost] = useState("");
-  const [imagePreview, setImagePreview] = useState<string | null>(null);  
-  const [showMenu, setShowMenu] = useState<number | null>(null);  
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showMenu, setShowMenu] = useState<number | null>(null);
+  const [selectedPost, setSelectedPost] = useState<any | null>(null);
 
   const handlePostCreation = () => {
     if (!newPost.trim()) return;
@@ -49,7 +52,7 @@ const PostSection = () => {
       question_id: posts.length + 2097,
       asked_by_user_id: 0,
       question_text: newPost,
-      is_anonymous: 0,
+      is_anonymous: isAnonymous ? 1 : 0,
       timestamp: new Date().toISOString(),
       category: null,
       url: "",
@@ -57,16 +60,16 @@ const PostSection = () => {
       channel_id: null,
       type: 1,
       user_id: 0,
-      name: "User",
-      username: "user",
-      profession: "",
-      profile_pic: "",
+      name: isAnonymous ? "Anonymous" : "User",
+      username: isAnonymous ? "Anonymous" : "user",
+      profession: isAnonymous ? "" : "Your Profession",
+      profile_pic: isAnonymous ? "" : "your-profile-pic.webp",
       reply_count: 0,
       likes_count: 0,
       replies_count: 0,
       comments_count: 0,
       is_liked: false,
-      media: []
+      media: imagePreview ? [{ media_url: imagePreview, media_type: "image" }] : []
     };
 
     setPosts([...posts, newPostData]);
@@ -80,21 +83,29 @@ const PostSection = () => {
       <PostButton onClick={() => setShowDialog(true)} />
       {showDialog && (
         <TextAreaWithDialog
-          newPost={newPost} // Pass newPost as a prop
+          newPost={newPost}
           setNewPost={setNewPost}
           setImagePreview={setImagePreview}
+          isAnonymous={isAnonymous}
+          setIsAnonymous={setIsAnonymous}
           onPost={handlePostCreation}
           onClose={() => setShowDialog(false)}
         />
       )}
-      
-      <div className="mt-4">
+
+      {selectedPost && (
+        <FullPostView post={selectedPost} setSelectedPost={setSelectedPost} />
+      )}
+
+      <div className="mt-4 relative">
         {posts.map((post) => (
-          <PostCard 
-            key={post.question_id} 
-            post={post} 
-            showMenu={showMenu} 
-            setShowMenu={setShowMenu} 
+          <PostCard
+            key={post.question_id}
+            post={post}
+            showMenu={showMenu}
+            setShowMenu={setShowMenu}
+            setPosts={setPosts}
+            setSelectedPost={setSelectedPost}
           />
         ))}
       </div>

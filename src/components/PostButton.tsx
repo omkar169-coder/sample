@@ -1,9 +1,9 @@
-// PostButton.tsx
+"use client";
 
 import React from "react";
 
 interface PostButtonProps {
-  onClick: () => void; // Make sure this prop is defined here
+  onClick: () => void; 
 }
 
 const PostButton: React.FC<PostButtonProps> = ({ onClick }) => {

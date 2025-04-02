@@ -1,105 +1,144 @@
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import TextAreaWithDialog from "@/components/TextAreaWithDialog";
-import PostButton from "@/components/PostButton";
-import PostCard from "@/components/PostCard";
-import FullPostView from "@/components/fullcardview";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import PostComposer from "@/components/PostComposer";
+import MergedPostCard from "@/components/MergedPostCard";
+
+interface Media {
+  media_url: string;
+  media_type: string;
+}
+
+interface Post {
+  question_id: number;
+  asked_by_user_id: number;
+  question_text: string;
+  is_anonymous: number;
+  timestamp: string;
+  category: string | null;
+  url: string;
+  asked_to: string | null;
+  channel_id: string | null;
+  type: number;
+  user_id: number;
+  name: string;
+  username: string;
+  profession: string;
+  profile_pic: string | null;
+  reply_count: number;
+  likes_count: number;
+  replies_count: number;
+  comments_count: number;
+  is_liked: boolean;
+  media: Media[];
+}
+
+const API_URL = "https://wooble.io/feed/discussion_api/fetch_personalised_questions.php";
+const USER_ID = 9168;
+const IMAGE_BASE_URL = "https://wooble.io/uploads/profile_pictures/";
+const DEFAULT_AVATAR = "/default-avatar.png";
 
 const PostSection = () => {
-  const router = useRouter();
-  const [posts, setPosts] = useState([
-    {
-      question_id: 2097,
-      asked_by_user_id: 30,
-      question_text: "The Biggest Career Mistake You Might Be Making (Without Realizing It)...",
-      is_anonymous: 0,
-      timestamp: "2025-03-25 07:34:56",
-      category: null,
-      url: "https://jpeg.org/images/jpeg-home.jpg",
-      asked_to: null,
-      channel_id: null,
-      type: 1,
-      user_id: 30,
-      name: "Arpita Gupta",
-      username: "Arpita",
-      profession: "Marketing & Business Manager At Wooble",
-      profile_pic: "profile-pic_67cea69407ad47.09949931.webp",
-      reply_count: 0,
-      likes_count: 2,
-      replies_count: 0,
-      comments_count: 0,
-      is_liked: false,
-      media: [
-        {
-          media_url: "https://cdn.prod.website-files.com/5f7ece8a7da656e8a25402bc/6410842bd4f442a63b6d25a9_How%20to%20turn%20a%20LinkedIn%20comment%20into%20a%20post%20(1).webp",
-          media_type: "image"
-        }
-      ]
-    }
-  ]);
-
-  const [showDialog, setShowDialog] = useState(false);
-  const [newPost, setNewPost] = useState("");
-  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [newPost, setNewPost] = useState<string>("");
+  const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [showMenu, setShowMenu] = useState<number | null>(null);
-  const [selectedPost, setSelectedPost] = useState<any | null>(null);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handlePostCreation = () => {
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
+  const fetchPosts = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(API_URL, {
+        params: {
+          limit: 10,
+          offset: 10,
+          user_id: USER_ID,
+          order: "random",
+        },
+        headers: { "Content-Type": "application/json" },
+      });
+
+      console.log("API Response:", response.data);
+
+      if (response.data && response.data.success) {
+        const formattedPosts = response.data.data.map((post: Post) => ({
+          ...post,
+          profile_pic: post.profile_pic
+            ? (post.profile_pic.includes("http") ? post.profile_pic : `${IMAGE_BASE_URL}${post.profile_pic}`)
+            : DEFAULT_AVATAR,
+          media: post.media.map((media) => ({
+            ...media,
+            media_url: media.media_url.includes("http") ? media.media_url : `https://wooble.io/uploads/media/${media.media_url}`,
+          })),
+          timestamp: new Date(post.timestamp).toLocaleString(),
+        }));
+
+        setPosts(formattedPosts);
+      } else {
+        setError(response.data?.message || "Failed to fetch posts.");
+      }
+    } catch (err: any) {
+      console.error("Axios Error:", err.response?.data || err.message);
+      setError("Error fetching posts.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePostCreation = async () => {
     if (!newPost.trim()) return;
 
-    const newPostData = {
-      question_id: posts.length + 2097,
-      asked_by_user_id: 0,
-      question_text: newPost,
-      is_anonymous: isAnonymous ? 1 : 0,
-      timestamp: new Date().toISOString(),
-      category: null,
-      url: "",
-      asked_to: null,
-      channel_id: null,
-      type: 1,
-      user_id: 0,
-      name: isAnonymous ? "Anonymous" : "User",
-      username: isAnonymous ? "Anonymous" : "user",
-      profession: isAnonymous ? "" : "Your Profession",
-      profile_pic: isAnonymous ? "" : "your-profile-pic.webp",
-      reply_count: 0,
-      likes_count: 0,
-      replies_count: 0,
-      comments_count: 0,
-      is_liked: false,
-      media: imagePreview ? [{ media_url: imagePreview, media_type: "image" }] : []
-    };
+    try {
+      const response = await axios.post(
+        "https://wooble.io/feed/discussion_api/create_question.php", 
+        {
+          user_id: USER_ID,
+          question_text: newPost,
+          is_anonymous: isAnonymous ? 1 : 0,
+          media: imagePreview ? [{ media_url: imagePreview, media_type: "image" }] : [],
+        },
+        { headers: { "Content-Type": "application/json" } }
+      );
 
-    setPosts([...posts, newPostData]);
-    setNewPost("");
-    setImagePreview(null);
-    setShowDialog(false);
+      console.log("Post Creation Response:", response.data);
+
+      if (response.data?.success) {
+        fetchPosts();
+        setNewPost("");
+        setImagePreview(null);
+      } else {
+        setError(response.data?.message || "Failed to create post.");
+      }
+    } catch (err: any) {
+      console.error("Error posting:", err.response?.data || err.message);
+      setError("Error posting your question.");
+    }
   };
 
   return (
     <div className="w-full max-w-3xl mx-auto bg-white shadow-md rounded-xl p-4 sm:p-6 md:p-8">
-      <PostButton onClick={() => setShowDialog(true)} />
-      {showDialog && (
-        <TextAreaWithDialog
-          newPost={newPost}
-          setNewPost={setNewPost}
-          setImagePreview={setImagePreview}
-          isAnonymous={isAnonymous}
-          setIsAnonymous={setIsAnonymous}
-          onPost={handlePostCreation}
-          onClose={() => setShowDialog(false)}
-        />
-      )}
+      <PostComposer 
+        newPost={newPost} 
+        setNewPost={setNewPost} 
+        setImagePreview={setImagePreview} 
+        isAnonymous={isAnonymous} 
+        setIsAnonymous={setIsAnonymous} 
+        onPost={handlePostCreation} 
+      />
 
-      {selectedPost && (
-        <FullPostView post={selectedPost} setSelectedPost={setSelectedPost} />
-      )}
+      {loading && <p className="text-center text-gray-500">Loading posts...</p>}
+      {error && <p className="text-center text-red-500">{error}</p>}
 
       <div className="mt-4 relative">
         {posts.map((post) => (
-          <PostCard
+          <MergedPostCard
             key={post.question_id}
             post={post}
             showMenu={showMenu}

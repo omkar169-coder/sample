@@ -135,7 +135,7 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
         <div className="absolute right-4 top-10 bg-white text-black shadow-lg rounded-lg p-2 w-36 border border-gray-200 z-10">
           <button
             onClick={handleCopyLink}
-            className="flex items-center gap-2 w-full p-2 rounded-lg hover:bg-gray-100"
+            className="flex items-center gap-2 h-10 w-full p-2 rounded-lg hover:bg-gray-100"
           >
             <Copy size={16} />
             <span>Copy Link</span>

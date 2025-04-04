@@ -94,6 +94,7 @@ const PostSection = ({ userId }: PostSectionProps) => {
     }
   };
 
+  
   const handlePostCreation = async () => {
     if (!newPost.trim()) return;
   

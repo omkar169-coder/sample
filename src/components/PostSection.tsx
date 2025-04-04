@@ -32,12 +32,16 @@ interface Post {
   media: Media[];
 }
 
+interface PostSectionProps {
+  userId: number;
+}
+
 const API_URL = "https://wooble.io/feed/discussion_api/fetch_personalised_questions.php";
-const USER_ID = 9168;
+const CREATE_POST_URL = "https://wooble.io/feed/discussion_api/create_question.php";
 const IMAGE_BASE_URL = "https://wooble.io/uploads/profile_pictures/";
 const DEFAULT_AVATAR = "/default-avatar.png";
 
-const PostSection = () => {
+const PostSection = ({ userId }: PostSectionProps) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [newPost, setNewPost] = useState<string>("");
   const [isAnonymous, setIsAnonymous] = useState<boolean>(false);
@@ -59,13 +63,11 @@ const PostSection = () => {
         params: {
           limit: 10,
           offset: 10,
-          user_id: USER_ID,
+          user_id: userId,
           order: "random",
         },
         headers: { "Content-Type": "application/json" },
       });
-
-      console.log("API Response:", response.data);
 
       if (response.data && response.data.success) {
         const formattedPosts = response.data.data.map((post: Post) => ({
@@ -94,21 +96,27 @@ const PostSection = () => {
 
   const handlePostCreation = async () => {
     if (!newPost.trim()) return;
-
+  
+    const formData = new URLSearchParams();
+    formData.append("user_id", String(userId));
+    formData.append("question_text", newPost);
+    formData.append("is_anonymous", isAnonymous ? "1" : "0");
+  
+    if (imagePreview) {
+      // Add single image only (Wooble seems to expect `media_url` + `media_type`)
+      formData.append("media_url", imagePreview);
+      formData.append("media_type", "image");
+    }
+  
     try {
       const response = await axios.post(
-        "https://wooble.io/feed/discussion_api/create_question.php", 
-        {
-          user_id: USER_ID,
-          question_text: newPost,
-          is_anonymous: isAnonymous ? 1 : 0,
-          media: imagePreview ? [{ media_url: imagePreview, media_type: "image" }] : [],
-        },
-        { headers: { "Content-Type": "application/json" } }
+        "https://wooble.io/feed/discussion_api/create_question.php",
+        formData,
+        { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
       );
-
+  
       console.log("Post Creation Response:", response.data);
-
+  
       if (response.data?.success) {
         fetchPosts();
         setNewPost("");
@@ -121,10 +129,12 @@ const PostSection = () => {
       setError("Error posting your question.");
     }
   };
+  
 
   return (
     <div className="w-full max-w-3xl mx-auto bg-white shadow-md rounded-xl p-4 sm:p-6 md:p-8">
-      <PostComposer 
+     <PostComposer 
+        userId={userId} // <-- Pass the dynamic or static userId here
         newPost={newPost} 
         setNewPost={setNewPost} 
         setImagePreview={setImagePreview} 
@@ -132,6 +142,7 @@ const PostSection = () => {
         setIsAnonymous={setIsAnonymous} 
         onPost={handlePostCreation} 
       />
+
 
       {loading && <p className="text-center text-gray-500">Loading posts...</p>}
       {error && <p className="text-center text-red-500">{error}</p>}

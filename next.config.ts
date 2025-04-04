@@ -1,9 +1,8 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
-    domains: ["wooble.io"], // Allow images from wooble.io
+    domains: ["wooble.io", "www.gravatar.com"], // Allow both domains
   },
 };
 
-export default nextConfig;
+module.exports = nextConfig;

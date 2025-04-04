@@ -4,6 +4,7 @@ import { MoreHorizontal, Copy, Trash } from "lucide-react";
 import LikeButton from "@/components/LikeButton";
 import ReplyButton from "@/components/ReplyButton";
 import ShareButton from "@/components/ShareButton";
+import Image from "next/image";
 
 interface Media {
   media_url: string;
@@ -62,23 +63,34 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
   const handleDeletePost = async () => {
     setDeleting(true);
     try {
+      const formData = new URLSearchParams();
+      formData.append("user_id", USER_ID.toString());
+      formData.append("question_id", post.question_id.toString());
+
       const response = await axios.post(
         API_DELETE_URL,
-        { user_id: USER_ID, question_id: post.question_id },
+        formData,
         {
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded",
           },
         }
       );
 
-      if (response.data.success) {
+      if (response.data?.success) {
         setPosts((prevPosts) => prevPosts.filter((p) => p.question_id !== post.question_id));
       } else {
-        console.error("Failed to delete post.", response.data);
+        console.error("Failed to delete post. Response:", response.data);
+        if (
+          typeof response.data === "string" &&
+          response.data.includes("Cannot delete or update a parent row")
+        ) {
+          alert("This post cannot be deleted because it is linked to existing replies or media.");
+        }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error deleting post:", err);
+      alert("Something went wrong while trying to delete the post.");
     } finally {
       setDeleting(false);
       setShowMenu(null);
@@ -89,26 +101,42 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
     <div className="bg-white p-4 sm:p-5 mb-5 rounded-xl shadow-md relative border border-gray-200">
       {/* Profile Section */}
       <div className="flex items-center gap-3 mb-3">
-      <img 
-        src={post.profile_pic ? `https://wooble.io/uploads/profile_pictures/${post.profile_pic}` : "/default-avatar.png"}
-        alt="User Avatar" 
-    />
-
-
-
-        <div>
-          <p className="text-sm sm:text-base font-semibold">{post.is_anonymous ? "Anonymous" : post.name}</p>
-          <p className="text-xs text-gray-500">{new Date(post.timestamp).toLocaleString()}</p>
+        <div className="relative w-10 h-10 rounded-full overflow-hidden">
+          <Image
+            src={
+              post.profile_pic
+                ? `https://wooble.io/uploads/profile_pictures/${post.profile_pic}`
+                : "/default-avatar.png"
+            }
+            alt="User Avatar"
+            layout="fill"
+            objectFit="cover"
+            className="rounded-full"
+          />
         </div>
-        <button onClick={() => setShowMenu(post.question_id)} className="ml-auto text-gray-600 hover:text-gray-800">
+        <div>
+          <p className="text-sm sm:text-base font-semibold">
+            {post.is_anonymous ? "Anonymous" : post.name}
+          </p>
+          <p className="text-xs text-gray-500">
+            {new Date(post.timestamp).toLocaleString()}
+          </p>
+        </div>
+        <button
+          onClick={() => setShowMenu(post.question_id)}
+          className="ml-auto text-gray-600 hover:text-gray-800"
+        >
           <MoreHorizontal size={20} />
         </button>
       </div>
 
       {/* Dropdown Menu */}
       {showMenu === post.question_id && (
-        <div className="absolute right-4 top-10 bg-white text-black shadow-lg rounded-lg p-2 w-36 border border-gray-200">
-          <button onClick={handleCopyLink} className="flex items-center gap-2 w-full p-2 rounded-lg hover:bg-gray-100">
+        <div className="absolute right-4 top-10 bg-white text-black shadow-lg rounded-lg p-2 w-36 border border-gray-200 z-10">
+          <button
+            onClick={handleCopyLink}
+            className="flex items-center gap-2 w-full p-2 rounded-lg hover:bg-gray-100"
+          >
             <Copy size={16} />
             <span>Copy Link</span>
           </button>
@@ -126,30 +154,52 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
       {/* Post Text */}
       <p className="text-gray-800 text-sm sm:text-base mt-2">{post.question_text}</p>
 
- 
       {/* Post Image */}
-      {post.media && post.media.length > 0 && (
-        <div className="mt-3">
-            {post.media.map((media, index) => (
-            media.media_type === "image" && (
-                <img
-                key={index}
-                src={`https://wooble.io/uploads/media/${media.media_url}`} // Removed proxy
-                alt="Post Media"
-                className="w-full rounded-lg border border-gray-300 mt-2"
-                onError={(e) => (e.currentTarget.style.display = "none")} // Hide if broken
-                />
-            )
-            ))}
-        </div>
+      {/* {post.media &&
+        post.media.length > 0 &&
+        post.media[0].media_type === "image" && (
+          <div className="relative w-full h-64 mt-3 rounded-xl overflow-hidden border border-gray-300">
+            <Image
+              src={`https://wooble.io/uploads/media/${post.media[0].media_url}`}
+              alt="Post Image"
+              layout="fill"
+              objectFit="cover"
+              className="rounded-xl"
+              onError={(e) => {
+                const target = e.currentTarget as HTMLImageElement;
+                target.style.display = "none";
+              }}
+            />
+          </div>
+        )} */}
+        {/* Post Image */}
+        {post.media &&
+          post.media.length > 0 &&
+          post.media[0].media_type === "image" && post.media[0].media_url && (
+            <div className="relative w-full h-64 mt-3 rounded-xl overflow-hidden border border-gray-300">
+              <img
+                src={`https://wooble.io/uploads/media/${post.media[0].media_url}`}
+                alt="Post Image"
+                className="w-full h-64 object-cover rounded-xl"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
+              />
+            </div>
         )}
 
 
       {/* Post Actions */}
       <div className="flex gap-2 mt-3 text-gray-600 text-sm">
-        <LikeButton />
-        <ReplyButton />
-        <ShareButton />
+      <LikeButton
+  questionId={post.question_id}
+  userId={USER_ID}
+  initialLikes={post.likes_count}
+  initiallyLiked={post.is_liked}
+/>
+
+        <ShareButton postUrl={`${window.location.origin}/post/${post.question_id}`} postTitle={post.question_text}/>
+        <ReplyButton questionId={post.question_id} />
       </div>
     </div>
   );

@@ -1,17 +1,35 @@
-import { useState } from "react";
-import { Share } from "lucide-react";
+import React from "react";
+import { IoIosShareAlt } from "react-icons/io";
 
-const ShareButton = () => {
-  const [shared, setShared] = useState(false);
+interface ShareButtonProps {
+  postUrl: string;
+  postTitle: string;
+}
+
+const ShareButton: React.FC<ShareButtonProps> = ({ postUrl, postTitle }) => {
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: postTitle,
+          url: postUrl,
+        });
+        console.log("Post shared successfully");
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          console.log("Share action was canceled by the user."); // ✅ No error thrown
+        } else {
+          console.error("Error sharing:", error); // Only log real errors
+        }
+      }
+    } else {
+      console.warn("Web Share API not supported in this browser.");
+    }
+  };
 
   return (
-    <button onClick={() => setShared(!shared)} className="focus:outline-none">
-      <Share
-        className="transition-all duration-300"
-        size={22}
-        color={shared ? "#34D399" : "#000"}
-        fill={shared ? "#34D399" : "none"}
-      />
+    <button onClick={handleShare} className="focus:outline-none">
+      <IoIosShareAlt className="transition-all duration-300" size={22} color="#000" />
     </button>
   );
 };

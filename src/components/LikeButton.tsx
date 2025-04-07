@@ -6,6 +6,7 @@ interface LikeButtonProps {
   userId: number;
   initialLikes: number;
   initiallyLiked: boolean;
+  isReply?: boolean; 
 }
 
 const LikeButton: React.FC<LikeButtonProps> = ({

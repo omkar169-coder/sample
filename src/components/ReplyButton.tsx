@@ -1,64 +1,84 @@
 import { useEffect, useState } from "react";
-import ReplySection from "./ReplySection"; // Import ReplySection to show the replies
+import ReplySection from "./ReplySection";
 
 interface ReplyButtonProps {
   questionId: number;
+  userId: number;
+  onClick?: () => void;
+  className?: string;
+  children?: React.ReactNode; // ✅ Add this line
 }
 
-const ReplyButton: React.FC<ReplyButtonProps> = ({ questionId }) => {
+
+const ReplyButton: React.FC<ReplyButtonProps> = ({ questionId, userId }) => {
   const [replyCount, setReplyCount] = useState<number>(0);
   const [showReplies, setShowReplies] = useState<boolean>(false);
-  const [replies, setReplies] = useState<any[]>([]); // Store the actual replies
+  const [replies, setReplies] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  
 
-  const toggleReplies = () => setShowReplies((prev) => !prev);
+  const fetchReplies = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `https://wooble.io/feed/discussion_api/fetch_replies.php?question_id=${questionId}`,
+        { method: "GET" }
+      );
+
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      const data = await response.json();
+
+      if (data.success) {
+        const repliesData = Array.isArray(data.data) ? data.data : [];
+        setReplyCount(repliesData.length);
+        setReplies(repliesData);
+      } else if (data.message === "No answers found") {
+        setReplyCount(0);
+        setReplies([]);
+      } else {
+        setError("Failed to fetch replies. Please try again.");
+      }
+    } catch (error: any) {
+      setError(`Error fetching replies: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchReplies = async () => {
-      try {
-        const response = await fetch(
-          `https://wooble.io/feed/discussion_api/fetch_replies.php?question_id=${questionId}`,
-          {
-            method: "GET", // Using GET to fetch replies
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        if (data.success) {
-          setReplyCount(data.data.length); // Update the reply count correctly
-          setReplies(data.data); // Store the replies in state
-        } else {
-          console.error("Failed to fetch replies: ", data.message);
-          setError("Failed to fetch replies. Please try again.");
-        }
-      } catch (error: any) {
-        console.error("Error fetching replies:", error);
-        setError(`Error fetching replies: ${error.message}`);
-      }
-    };
-
     fetchReplies();
   }, [questionId]);
 
+  const handleToggleReplies = () => {
+    if (!showReplies && replies.length === 0) {
+      fetchReplies();
+    }
+    setShowReplies((prev) => !prev);
+  };
+
+  const handleNewReply = (newReply: any) => {
+    setReplies((prev) => [newReply, ...prev]);
+    setReplyCount((prev) => prev + 1);
+  };
+
   return (
     <div>
-      {/* Reply button to toggle replies */}
-      <button
-        className="text-sm text-gray-800 focus:outline-none"
-        onClick={toggleReplies}
-      >
+      <button className="text-sm text-gray-800 focus:outline-none" onClick={handleToggleReplies}>
         +{replyCount} replies
       </button>
 
-      {/* Display error message if any */}
-      {error && <div className="text-red-600">{error}</div>}
+      {error && <div className="text-red-600 mt-1">{error}</div>}
+      {loading && <div className="text-sm text-gray-500 mt-1">Loading replies...</div>}
 
-      {/* Display the ReplySection if showReplies is true */}
-      {showReplies && <ReplySection replies={replies} />} {/* Pass the replies to ReplySection */}
+      {showReplies && (
+        <ReplySection
+          questionId={questionId}
+          
+          onReply={handleNewReply}
+          userId={userId}
+        />
+      )}
     </div>
   );
 };

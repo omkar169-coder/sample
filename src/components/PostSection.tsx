@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import PostComposer from "@/components/PostComposer";
 import MergedPostCard from "@/components/MergedPostCard";
@@ -38,8 +38,27 @@ interface PostSectionProps {
 
 const API_URL = "https://wooble.io/feed/discussion_api/fetch_personalised_questions.php";
 const CREATE_POST_URL = "https://wooble.io/feed/discussion_api/create_question.php";
-const IMAGE_BASE_URL = "https://wooble.io/uploads/profile_pictures/";
 const DEFAULT_AVATAR = "/default-avatar.png";
+
+const encodeFileName = (filename: string): string => {
+  try {
+    return btoa(filename);
+  } catch {
+    return filename;
+  }
+};
+
+const sanitizeText = (input: string) => {
+  const withoutTags = input.replace(/<\/?[^>]+(>|$)/g, "");
+  const textArea = document.createElement("textarea");
+  textArea.innerHTML = withoutTags;
+  return textArea.value;
+};
+
+const truncateText = (text: string, limit: number = 300) => {
+  if (text.length <= limit) return text;
+  return text.slice(0, limit).trim() + "…";
+};
 
 const PostSection = ({ userId }: PostSectionProps) => {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -50,6 +69,7 @@ const PostSection = ({ userId }: PostSectionProps) => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     fetchPosts();
@@ -70,17 +90,23 @@ const PostSection = ({ userId }: PostSectionProps) => {
       });
 
       if (response.data && response.data.success) {
-        const formattedPosts = response.data.data.map((post: Post) => ({
-          ...post,
-          profile_pic: post.profile_pic
-            ? (post.profile_pic.includes("http") ? post.profile_pic : `${IMAGE_BASE_URL}${post.profile_pic}`)
-            : DEFAULT_AVATAR,
-          media: post.media.map((media) => ({
+        const formattedPosts = response.data.data.map((post: Post) => {
+          const formattedProfilePic = post.profile_pic
+            ? `https://wooble.org/dms/${encodeFileName(post.profile_pic)}`
+            : DEFAULT_AVATAR;
+
+          const formattedMedia = post.media.map((media) => ({
             ...media,
-            media_url: media.media_url.includes("http") ? media.media_url : `https://wooble.io/uploads/media/${media.media_url}`,
-          })),
-          timestamp: new Date(post.timestamp).toLocaleString(),
-        }));
+            media_url: `https://wooble.org/dms/${encodeFileName(media.media_url)}`,
+          }));
+
+          return {
+            ...post,
+            profile_pic: formattedProfilePic,
+            media: formattedMedia,
+            timestamp: new Date(post.timestamp).toLocaleString(),
+          };
+        });
 
         setPosts(formattedPosts);
       } else {
@@ -94,30 +120,51 @@ const PostSection = ({ userId }: PostSectionProps) => {
     }
   };
 
-  
+  // Infinite scroll loop logic
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && posts.length > 0) {
+          // Append same posts to simulate looping
+          setPosts((prev) => [...prev, ...prev]);
+        }
+      },
+      { threshold: 1 }
+    );
+
+    if (bottomRef.current) {
+      observer.observe(bottomRef.current);
+    }
+
+    return () => {
+      if (bottomRef.current) {
+        observer.unobserve(bottomRef.current);
+      }
+    };
+  }, [posts]);
+
   const handlePostCreation = async () => {
     if (!newPost.trim()) return;
-  
+
     const formData = new URLSearchParams();
     formData.append("user_id", String(userId));
     formData.append("question_text", newPost);
     formData.append("is_anonymous", isAnonymous ? "1" : "0");
-  
+
     if (imagePreview) {
-      // Add single image only (Wooble seems to expect `media_url` + `media_type`)
-      formData.append("media_url", imagePreview);
+      const fileName = imagePreview.split("/").pop() || imagePreview;
+      const encodedImage = encodeFileName(fileName);
+      formData.append("media_url", `https://wooble.org/dms/${encodedImage}`);
       formData.append("media_type", "image");
     }
-  
+
     try {
       const response = await axios.post(
-        "https://wooble.io/feed/discussion_api/create_question.php",
+        CREATE_POST_URL,
         formData,
         { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
       );
-  
-      console.log("Post Creation Response:", response.data);
-  
+
       if (response.data?.success) {
         fetchPosts();
         setNewPost("");
@@ -130,12 +177,11 @@ const PostSection = ({ userId }: PostSectionProps) => {
       setError("Error posting your question.");
     }
   };
-  
 
   return (
-    <div className="w-full max-w-3xl mx-auto bg-white shadow-md rounded-xl p-4 sm:p-6 md:p-8">
-     <PostComposer 
-        userId={userId} // <-- Pass the dynamic or static userId here
+    <div className="w-full max-w-3xl mx-auto bg-gray shadow-md rounded-xl p-4 sm:p-6 md:p-8">
+      <PostComposer 
+        userId={userId} 
         newPost={newPost} 
         setNewPost={setNewPost} 
         setImagePreview={setImagePreview} 
@@ -144,14 +190,13 @@ const PostSection = ({ userId }: PostSectionProps) => {
         onPost={handlePostCreation} 
       />
 
-
       {loading && <p className="text-center text-gray-500">Loading posts...</p>}
       {error && <p className="text-center text-red-500">{error}</p>}
 
       <div className="mt-4 relative">
-        {posts.map((post) => (
+        {posts.map((post, index) => (
           <MergedPostCard
-            key={post.question_id}
+            key={`${post.question_id}-${index}`}
             post={post}
             showMenu={showMenu}
             setShowMenu={setShowMenu}
@@ -159,6 +204,7 @@ const PostSection = ({ userId }: PostSectionProps) => {
             setSelectedPost={setSelectedPost}
           />
         ))}
+        <div ref={bottomRef} className="h-1" />
       </div>
     </div>
   );

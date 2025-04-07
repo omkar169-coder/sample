@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { X, Image as ImageIcon, Trash2 } from "lucide-react";
 import { MdPublic } from "react-icons/md";
@@ -31,6 +31,26 @@ const PostComposer: React.FC<PostComposerProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [postType, setPostType] = useState("public");
+  const [isEditorEmpty, setIsEditorEmpty] = useState(true);
+  const editorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      e.preventDefault();
+      const text = e.clipboardData?.getData("text/plain");
+      if (text && editorRef.current) {
+        document.execCommand("insertText", false, text);
+      }
+    };
+  
+    const editor = editorRef.current;
+    editor?.addEventListener("paste", handlePaste);
+  
+    return () => {
+      editor?.removeEventListener("paste", handlePaste);
+    };
+  }, []);
+  
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -53,14 +73,46 @@ const PostComposer: React.FC<PostComposerProps> = ({
     setImagePreview(null);
   };
 
+  const sanitizeHTML = (dirtyHtml: string): string => {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(dirtyHtml, "text/html");
+  
+    let result = "";
+  
+    const traverse = (node: Node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        result += node.textContent;
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const el = node as HTMLElement;
+  
+        if (el.tagName === "BR") {
+          result += "\n";
+        } else if (el.tagName === "P") {
+          // Add paragraph text followed by double line break
+          Array.from(el.childNodes).forEach(traverse);
+          result += "\n\n";
+        } else {
+          Array.from(el.childNodes).forEach(traverse);
+        }
+      }
+    };
+  
+    doc.body.childNodes.forEach(traverse);
+  
+    // Clean up excessive newlines at the end
+    return result.trim().replace(/\n{3,}/g, "\n\n");
+  };
+  
   const handlePost = async () => {
-    if (!newPost.trim()) return;
-    setUploading(true);
+    const plainText = editorRef.current?.innerText.trim() || "";
+    if (!plainText) return;
 
+
+    setUploading(true);
     try {
       const formData = new FormData();
       formData.append("user_id", String(userId));
-      formData.append("question_text", newPost);
+      formData.append("question_text", plainText);
       formData.append("is_anonymous", isAnonymous ? "1" : "0");
 
       if (selectedFile) {
@@ -83,6 +135,9 @@ const PostComposer: React.FC<PostComposerProps> = ({
         onPost();
         setNewPost("");
         removeImage();
+        // if (editorRef.current) editorRef.current.innerHTML = "";
+        if (editorRef.current) editorRef.current.innerText = "";
+
         setIsModalOpen(false);
       } else {
         console.error("API Error:", response.data.message);
@@ -100,38 +155,33 @@ const PostComposer: React.FC<PostComposerProps> = ({
     }
   };
 
-  // 🌟 Magic paste cleaner to remove HTML tags
-  const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    e.preventDefault();
-    const text = e.clipboardData.getData("text/plain");
-    const cleanedText = text.replace(/<[^>]+>/g, ""); // remove HTML tags
-    setNewPost((prev) => prev + cleanedText);
-  };
-
   return (
     <div>
       {/* Post Entry Bar */}
-      <div className="flex items-center space-x-3 mb-4">
+      <div className="flex items-center bg-white gap-4 px-4 py-4 mb-4 rounded-lg shadow-md">
         <Image
           src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
           alt="Profile"
-          width={40}
-          height={40}
+          width={50}
+          height={50}
           className="rounded-full"
         />
+        
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex-1 text-left text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 px-4 py-3"
+          className="flex-1 text-left text-gray-500 bg-white rounded-lg px-4 py-2"
         >
           What's on your mind?
         </button>
+        
         <button
           onClick={() => setIsModalOpen(true)}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          className="px-4 py-2 bg-white text-black border border-black rounded-r-full rounded-l-full"
         >
           Post
         </button>
       </div>
+
 
       {/* Modal */}
       {isModalOpen && (
@@ -144,13 +194,24 @@ const PostComposer: React.FC<PostComposerProps> = ({
               <X size={20} />
             </button>
             <h2 className="text-xl font-semibold mb-3 text-gray-700">New Topic</h2>
-            <textarea
-              value={newPost}
-              onChange={(e) => setNewPost(e.target.value)}
-              onPaste={handlePaste} // ✅ handle paste event
-              placeholder="Write something here..."
-              className="w-full p-3 text-sm rounded-lg border border-gray-300 bg-gray-100 resize-none focus:ring-2 focus:ring-blue-400 outline-none h-32"
-            />
+
+            <div className="relative w-full">
+              <div
+                ref={editorRef}
+                contentEditable
+                className="w-full p-3 text-sm rounded-lg border border-gray-300 bg-gray-100 resize-none focus:ring-2 focus:ring-blue-400 outline-none h-32 overflow-y-auto"
+                style={{
+                  whiteSpace: "pre-wrap",
+                  wordBreak: "break-word",
+                }}
+              />
+              {isEditorEmpty && (
+                <p className="absolute top-3 left-3 text-sm text-gray-400 pointer-events-none">
+                  Write something here...
+                </p>
+              )}
+            </div>
+
             <div className="flex items-center space-x-3 mt-3 text-gray-500">
               <label htmlFor="imageUpload" className="cursor-pointer hover:text-gray-700">
                 <ImageIcon size={20} />

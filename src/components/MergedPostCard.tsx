@@ -168,7 +168,7 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
 
         {/* Dropdown Menu */}
         {showMenu === post.question_id && (
-          <div className="absolute right-4 top-10 bg-white text-black shadow-lg rounded-lg p-2 w-36 border border-gray-200 z-10">
+          <div className="absolute right-4 top-10 mt-2 bg-white text-black shadow-lg rounded-lg p-2 w-36 border border-gray-200 z-10">
             <button
               onClick={handleCopyLink}
               className="flex items-center gap-2 h-10 w-full p-2 rounded-lg hover:bg-gray-100"
@@ -231,10 +231,6 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
       />
     </div>
 )}
-
-
-
-
         {/* Post Actions */}
         <div className="flex gap-2 mt-3 text-gray-600 text-sm">
           <LikeButton
@@ -250,6 +246,7 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
           <ReplyButton questionId={post.question_id} userId={USER_ID} />
         </div>
       </div>
+      
     </>
   );
 };

@@ -1,22 +1,20 @@
-import { useEffect, useState } from "react";
-import ReplySection from "./ReplySection";
+import { useState, useEffect } from "react";
+import ReplySection from "@/components/ReplySection";
 
 interface ReplyButtonProps {
   questionId: number;
   userId: number;
   onClick?: () => void;
   className?: string;
-  children?: React.ReactNode; // ✅ Add this line
+  children?: React.ReactNode;
 }
 
-
-const ReplyButton: React.FC<ReplyButtonProps> = ({ questionId, userId }) => {
+const ReplyButton: React.FC<ReplyButtonProps> = ({ questionId, userId, onClick }) => {
   const [replyCount, setReplyCount] = useState<number>(0);
   const [showReplies, setShowReplies] = useState<boolean>(false);
   const [replies, setReplies] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  
 
   const fetchReplies = async () => {
     setLoading(true);
@@ -31,11 +29,11 @@ const ReplyButton: React.FC<ReplyButtonProps> = ({ questionId, userId }) => {
 
       if (data.success) {
         const repliesData = Array.isArray(data.data) ? data.data : [];
-        setReplyCount(repliesData.length);
         setReplies(repliesData);
+        setReplyCount(repliesData.length);
       } else if (data.message === "No answers found") {
-        setReplyCount(0);
         setReplies([]);
+        setReplyCount(0);
       } else {
         setError("Failed to fetch replies. Please try again.");
       }
@@ -46,8 +44,22 @@ const ReplyButton: React.FC<ReplyButtonProps> = ({ questionId, userId }) => {
     }
   };
 
+  const fetchReplyCount = async () => {
+    try {
+      const response = await fetch(
+        `https://wooble.io/feed/discussion_api/fetch_replies.php?question_id=${questionId}`
+      );
+      const data = await response.json();
+      if (data.success && Array.isArray(data.data)) {
+        setReplyCount(data.data.length);
+      }
+    } catch (error) {
+      console.error("Failed to fetch reply count:", error);
+    }
+  };
+
   useEffect(() => {
-    fetchReplies();
+    fetchReplyCount();
   }, [questionId]);
 
   const handleToggleReplies = () => {
@@ -55,6 +67,7 @@ const ReplyButton: React.FC<ReplyButtonProps> = ({ questionId, userId }) => {
       fetchReplies();
     }
     setShowReplies((prev) => !prev);
+    if (onClick) onClick();
   };
 
   const handleNewReply = (newReply: any) => {
@@ -74,7 +87,6 @@ const ReplyButton: React.FC<ReplyButtonProps> = ({ questionId, userId }) => {
       {showReplies && (
         <ReplySection
           questionId={questionId}
-          
           onReply={handleNewReply}
           userId={userId}
         />

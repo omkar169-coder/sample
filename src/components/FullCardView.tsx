@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import LikeButton from "@/components/LikeButton";
 import ShareButton from "@/components/ShareButton";
 import ReplyButton from "@/components/ReplyButton";
@@ -33,18 +33,25 @@ interface FullCardViewProps {
 const FullCardView: React.FC<FullCardViewProps> = ({ post, onClose }) => {
   const [showMore, setShowMore] = useState(false);
   const [replyInput, setReplyInput] = useState("");
+  const [showFullText, setShowFullText] = useState(false);
 
   const toggleShowMore = () => setShowMore(!showMore);
 
   const handleReply = () => {
-    // Add your reply post logic here
     console.log("Reply:", replyInput);
     setReplyInput("");
   };
 
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, []);
+
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center">
-      <div className="relative w-[90vw] h-[90vh] bg-white rounded-2xl shadow-xl overflow-hidden flex">
+    <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-[3px] bg-opacity-60 flex items-center justify-center p-2">
+      <div className="relative w-full max-w-6xl max-h-[95vh] bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
         {/* Close Button */}
         <button
           className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 z-50"
@@ -54,18 +61,18 @@ const FullCardView: React.FC<FullCardViewProps> = ({ post, onClose }) => {
         </button>
 
         {/* Left: Image */}
-        <div className="w-1/2 h-full bg-black flex items-center justify-center overflow-hidden">
+        <div className="w-full md:w-1/2 h-[250px] md:h-auto bg-black flex items-center justify-center overflow-hidden">
           {post.media[0]?.media_type === "image" && (
             <img
               src={post.media[0].media_url}
               alt="Post"
-              className="object-contain max-h-full max-w-full rounded-l-2xl"
+              className="w-full h-full object-cover object-center md:rounded-l-2xl"
             />
           )}
         </div>
 
         {/* Right: Info and Actions */}
-        <div className="w-1/2 h-full overflow-y-auto p-6 space-y-4 flex flex-col">
+        <div className="w-full md:w-1/2 h-full max-h-[95vh] overflow-y-auto p-4 sm:p-6 space-y-4 flex flex-col">
           {/* User Info */}
           <div className="flex items-center space-x-4">
             <img
@@ -79,12 +86,31 @@ const FullCardView: React.FC<FullCardViewProps> = ({ post, onClose }) => {
             </div>
           </div>
 
-          {/* Post Content */}
-          <div>
-            <p
-              className="text-gray-800 whitespace-pre-wrap"
-              dangerouslySetInnerHTML={{ __html: post.question_text }}
-            />
+          {/* Post Content with See More */}
+          <div className="max-h-40 overflow-hidden overflow-y-auto pr-1">
+            <div className="text-gray-800 whitespace-pre-wrap text-sm">
+              {showFullText ? (
+                <div dangerouslySetInnerHTML={{ __html: post.question_text }} />
+              ) : (
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      post.question_text.length > 300
+                        ? post.question_text.slice(0, 300) + "..."
+                        : post.question_text,
+                  }}
+                />
+              )}
+
+              {post.question_text.length > 300 && (
+                <button
+                  className="text-blue-500 mt-1 text-sm hover:underline"
+                  onClick={() => setShowFullText(!showFullText)}
+                >
+                  {showFullText ? "See less" : "See full text"}
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Actions */}
@@ -99,10 +125,7 @@ const FullCardView: React.FC<FullCardViewProps> = ({ post, onClose }) => {
               postUrl={`${window.location.origin}/post/${post.question_id}`}
               postTitle={post.question_text}
             />
-            <ReplyButton
-              questionId={post.question_id}
-              userId={post.user_id}
-            />
+            <ReplyButton questionId={post.question_id} userId={post.user_id} />
           </div>
 
           {/* Reply Box */}

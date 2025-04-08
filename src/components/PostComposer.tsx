@@ -185,8 +185,8 @@ const PostComposer: React.FC<PostComposerProps> = ({
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex justify-center items-center bg-opacity-40 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-xl p-5 relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-40 backdrop-blur-sm">
+  <div className="relative left-[-50px] bg-white/90 border border-gray-300 rounded-xl shadow-2xl w-full max-w-2xl p-6">
             <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-3 right-3 text-gray-600 hover:text-gray-800"

@@ -132,7 +132,7 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
 
   return (
     <>
-      <div className="bg-white p-4 sm:p-5 mb-5 rounded-xl shadow-md relative border border-gray-200">
+      <div className="bg-white p-4 sm:p-5 mb-5 rounded-xl  relative border border-gray-200">
         {/* Profile Section */}
         <div className="flex items-center gap-3 mb-3">
           <div className="relative w-10 h-10 rounded-full overflow-hidden">
@@ -190,7 +190,7 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
         {/* Post Text */}
         <div
           ref={contentRef}
-          className={`text-sm text-gray-800 whitespace-pre-wrap transition-all duration-300 ${
+          className={`text-sm text-gray-800 leading-snug whitespace-pre-wrap break-words transition-all duration-300 pb-[2px] ${
             showFullText ? "max-h-full" : "max-h-[150px] overflow-hidden"
           }`}
           dangerouslySetInnerHTML={{ __html: post.question_text }}
@@ -204,32 +204,36 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
           </button>
         )}
 
-        {/* Post Image */}
-        {post.media &&
+       {/* Post Image */}
+       {post.media &&
+  post.media.length > 0 &&
+  post.media[0].media_type === "image" &&
+  post.media[0].media_url && (
+    <div
+      className="relative mt-3 cursor-pointer w-fit max-w-full"
+      onClick={() => {
+        if (
           post.media.length > 0 &&
-          post.media[0].media_type === "image" &&
-          post.media[0].media_url && (
-            <div
-              className="relative w-full h-64 mt-3 rounded-xl overflow-hidden border border-gray-300 cursor-pointer"
-              onClick={() => {
-                if (
-                  post.media.length > 0 &&
-                  post.media[0].media_type === "image"
-                ) {
-                  setSelectedPost(post);
-                }
-              }}
-            >
-              <img
-                src={sanitizeMediaUrl(post.media[0].media_url)}
-                alt="Post Image"
-                className="w-full h-64 object-cover rounded-xl"
-                onError={(e) => {
-                  e.currentTarget.style.display = "none";
-                }}
-              />
-            </div>
-          )}
+          post.media[0].media_type === "image"
+        ) {
+          setSelectedPost(post);
+        }
+      }}
+    >
+      <img
+        src={sanitizeMediaUrl(post.media[0].media_url)}
+        alt="Post Image"
+        className="rounded-xl object-contain max-w-full h-auto"
+        style={{ maxHeight: "500px" }}
+        onError={(e) => {
+          e.currentTarget.style.display = "none";
+        }}
+      />
+    </div>
+)}
+
+
+
 
         {/* Post Actions */}
         <div className="flex gap-2 mt-3 text-gray-600 text-sm">
@@ -246,11 +250,6 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
           <ReplyButton questionId={post.question_id} userId={USER_ID} />
         </div>
       </div>
-
-      {/* Full Card View Overlay */}
-      {/* {post === selectedPost && (
-        <FullCardView post={post} onClose={() => setSelectedPost(null)} />
-      )} */}
     </>
   );
 };

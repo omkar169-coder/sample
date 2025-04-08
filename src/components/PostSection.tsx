@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import PostComposer from "@/components/PostComposer";
@@ -180,7 +182,8 @@ const PostSection = ({ userId }: PostSectionProps) => {
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto bg-gray shadow-md rounded-xl p-4 sm:p-6 md:p-8">
+     <div className="w-full max-w-3xl mx-auto bg-gray  rounded-xl ">   
+      {/* //shadow-md  // p-4  sm:p-6 md:p-8 */}
       <PostComposer 
         userId={userId} 
         newPost={newPost} 

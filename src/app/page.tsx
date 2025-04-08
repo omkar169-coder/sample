@@ -13,7 +13,8 @@ import PostSection from "@/components/PostSection";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
-
+  const [userId, setUserId] = useState<number | null>(null);
+  
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
     handleResize();
@@ -37,9 +38,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
         <div className="flex-grow px-2 max-w-[750px] sm:px-4 my-2 lg:my-0 overflow-hidden overflow-x-hidden">
           <div className="mb-2">
-            <SearchBar />
+              <SearchBar />
           </div>
-          <PostSection />
+          <PostSection userId={userId as number} />
         </div>
 
    

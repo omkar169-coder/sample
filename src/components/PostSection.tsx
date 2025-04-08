@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import PostComposer from "@/components/PostComposer";
 import MergedPostCard from "@/components/MergedPostCard";
+import FullCardView from "@/components/FullCardView";
 
 interface Media {
   media_url: string;
@@ -120,12 +121,12 @@ const PostSection = ({ userId }: PostSectionProps) => {
     }
   };
 
-  // Infinite scroll loop logic
+  
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && posts.length > 0) {
-          // Append same posts to simulate looping
+          
           setPosts((prev) => [...prev, ...prev]);
         }
       },
@@ -206,6 +207,13 @@ const PostSection = ({ userId }: PostSectionProps) => {
         ))}
         <div ref={bottomRef} className="h-1" />
       </div>
+      {selectedPost && (
+  <FullCardView 
+    post={selectedPost} 
+    onClose={() => setSelectedPost(null)} 
+  />
+)}
+
     </div>
   );
 };

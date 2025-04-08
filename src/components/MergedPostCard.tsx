@@ -44,6 +44,7 @@ interface MergedPostCardProps {
   setShowMenu: React.Dispatch<React.SetStateAction<number | null>>;
   setPosts: React.Dispatch<React.SetStateAction<Post[]>>;
   setSelectedPost: React.Dispatch<React.SetStateAction<Post | null>>;
+  
 }
 
 const API_DELETE_URL =
@@ -247,9 +248,9 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
       </div>
 
       {/* Full Card View Overlay */}
-      {post === selectedPost && (
+      {/* {post === selectedPost && (
         <FullCardView post={post} onClose={() => setSelectedPost(null)} />
-      )}
+      )} */}
     </>
   );
 };

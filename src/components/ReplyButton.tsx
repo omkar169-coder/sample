@@ -83,16 +83,7 @@ const ReplyButton: React.FC<ReplyButtonProps> = ({ questionId, userId, onClick }
 
       {error && <div className="text-red-600 mt-1">{error}</div>}
       {loading && <div className="text-sm text-gray-500 mt-1">Loading replies...</div>}
-
-      {showReplies && (
-        <ReplySection
-          questionId={questionId}
-          onReply={handleNewReply}
-          userId={userId}
-        />
-      )}
     </div>
   );
 };
-
 export default ReplyButton;

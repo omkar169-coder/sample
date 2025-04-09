@@ -8,6 +8,7 @@ import ReplyButton from "@/components/ReplyButton";
 import ShareButton from "@/components/ShareButton";
 import Image from "next/image";
 import FullCardView from "@/components/FullCardView";
+import ReplySection from "@/components/ReplySection";
 
 interface Media {
   media_url: string;
@@ -44,7 +45,6 @@ interface MergedPostCardProps {
   setShowMenu: React.Dispatch<React.SetStateAction<number | null>>;
   setPosts: React.Dispatch<React.SetStateAction<Post[]>>;
   setSelectedPost: React.Dispatch<React.SetStateAction<Post | null>>;
-  
 }
 
 const API_DELETE_URL =
@@ -56,18 +56,6 @@ const sanitizeMediaUrl = (url: string): string => {
   return `https://wooble.org/dms/${fileName}`;
 };
 
-const sanitizeText = (input: string) => {
-  const withoutTags = input.replace(/<\/?[^>]+(>|$)/g, "");
-  const textArea = document.createElement("textarea");
-  textArea.innerHTML = withoutTags;
-  return textArea.value;
-};
-
-const truncateText = (text: string, limit: number = 300) => {
-  if (text.length <= limit) return text;
-  return text.slice(0, limit).trim() + "…";
-};
-
 const MergedPostCard: React.FC<MergedPostCardProps> = ({
   post,
   showMenu,
@@ -76,9 +64,9 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
   setSelectedPost,
 }) => {
   const [deleting, setDeleting] = useState(false);
-  const [selectedPost, setLocalSelectedPost] = useState<Post | null>(null); 
   const [showFullText, setShowFullText] = useState(false);
   const [isOverflowing, setIsOverflowing] = useState(false);
+  const [showReplies, setShowReplies] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -132,7 +120,7 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
 
   return (
     <>
-      <div className="bg-white p-4 sm:p-5 mb-5 rounded-xl  relative border border-gray-200">
+      <div className="bg-white p-4 sm:p-5 mb-2 rounded-xl relative border border-gray-200">
         {/* Profile Section */}
         <div className="flex items-center gap-3 mb-3">
           <div className="relative w-10 h-10 rounded-full overflow-hidden">
@@ -204,33 +192,27 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
           </button>
         )}
 
-       {/* Post Image */}
-       {post.media &&
-  post.media.length > 0 &&
-  post.media[0].media_type === "image" &&
-  post.media[0].media_url && (
-    <div
-      className="relative mt-3 cursor-pointer w-fit max-w-full"
-      onClick={() => {
-        if (
+        {/* Post Image */}
+        {post.media &&
           post.media.length > 0 &&
-          post.media[0].media_type === "image"
-        ) {
-          setSelectedPost(post);
-        }
-      }}
-    >
-      <img
-        src={sanitizeMediaUrl(post.media[0].media_url)}
-        alt="Post Image"
-        className="rounded-xl object-contain max-w-full h-auto"
-        style={{ maxHeight: "500px" }}
-        onError={(e) => {
-          e.currentTarget.style.display = "none";
-        }}
-      />
-    </div>
-)}
+          post.media[0].media_type === "image" &&
+          post.media[0].media_url && (
+            <div
+              className="relative mt-3 cursor-pointer w-fit max-w-full"
+              onClick={() => setSelectedPost(post)}
+            >
+              <img
+                src={sanitizeMediaUrl(post.media[0].media_url)}
+                alt="Post Image"
+                className="rounded-xl object-contain max-w-full h-auto"
+                style={{ maxHeight: "500px" }}
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
+              />
+            </div>
+          )}
+
         {/* Post Actions */}
         <div className="flex gap-2 mt-3 text-gray-600 text-sm">
           <LikeButton
@@ -243,10 +225,25 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
             postUrl={`${window.location.origin}/post/${post.question_id}`}
             postTitle={post.question_text}
           />
-          <ReplyButton questionId={post.question_id} userId={USER_ID} />
+          <ReplyButton
+            questionId={post.question_id}
+            userId={USER_ID}
+            onClick={() => setShowReplies(!showReplies)}
+          />
         </div>
+
+        {/* Reply Section */}
+        {showReplies && (
+          <div className="mb-6 mt-0">
+            <ReplySection
+              questionId={post.question_id ?? 0}
+              userId={USER_ID}
+              onReply={() => {}}
+              isFullPage={false} 
+            />
+          </div>
+        )}
       </div>
-      
     </>
   );
 };

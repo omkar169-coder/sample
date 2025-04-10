@@ -3,13 +3,13 @@ import ReplySection from "@/components/ReplySection";
 
 interface ReplyButtonProps {
   questionId: number;
-  userId: number;
+  //userId: number;
   onClick?: () => void;
   className?: string;
   children?: React.ReactNode;
 }
 
-const ReplyButton: React.FC<ReplyButtonProps> = ({ questionId, userId, onClick }) => {
+const ReplyButton: React.FC<ReplyButtonProps> = ({ questionId,  onClick }) => {
   const [replyCount, setReplyCount] = useState<number>(0);
   const [showReplies, setShowReplies] = useState<boolean>(false);
   const [replies, setReplies] = useState<any[]>([]);

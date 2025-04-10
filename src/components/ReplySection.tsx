@@ -28,21 +28,24 @@ interface Reply {
 
 interface ReplySectionProps {
   questionId: number;
-  userId: number;
+  slug: string;
   onReply: (newReply: Reply) => void;
-  isFullPage?: boolean; // ✅ Add this
+  isFullPage?: boolean;
 }
 
-const ReplySection: React.FC<ReplySectionProps> = ({ questionId, userId, onReply, isFullPage = false  }) => {
+const ReplySection: React.FC<ReplySectionProps> = ({
+  questionId,
+  slug,
+  onReply,
+  isFullPage = false,
+}) => {
   const [allReplies, setAllReplies] = useState<Reply[]>([]);
-  const [showAll, setShowAll] = useState(false);
   const [loading, setLoading] = useState(false);
   const [expandedReplies, setExpandedReplies] = useState<number[]>([]);
+  const [showAllReplies, setShowAllReplies] = useState(false);
+  const [posting, setPosting] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null);
   const [isEditorEmpty, setIsEditorEmpty] = useState(true);
-  const [posting, setPosting] = useState(false);
-
-  const visibleReplies = showAll ? allReplies : allReplies.slice(0, 2);
 
   useEffect(() => {
     const fetchReplies = async () => {
@@ -76,7 +79,6 @@ const ReplySection: React.FC<ReplySectionProps> = ({ questionId, userId, onReply
     setPosting(true);
     const formData = new URLSearchParams();
     formData.append("question_id", questionId.toString());
-    formData.append("user_id", userId.toString());
     formData.append("answer_text", content);
     formData.append("is_anonymous", "0");
 
@@ -118,13 +120,16 @@ const ReplySection: React.FC<ReplySectionProps> = ({ questionId, userId, onReply
   const encodeFileName = (filename: string) => {
     try {
       return btoa(filename);
-    } catch (e) {
+    } catch {
       return filename;
     }
   };
 
+  const visibleReplies = showAllReplies ? allReplies : allReplies.slice(0, 2);
+  const remainingReplies = allReplies.length - visibleReplies.length;
+
   return (
-    <div className="mt-0 bg-white max-w-3xl mx-auto space-y-4 ">
+    <div className="mt-0 bg-white max-w-3xl mx-auto space-y-4">
       {loading ? (
         <p className="text-sm text-gray-400">Loading replies...</p>
       ) : (
@@ -143,7 +148,8 @@ const ReplySection: React.FC<ReplySectionProps> = ({ questionId, userId, onReply
               : "";
 
             const mediaSrc =
-              reply.media?.length > 0 && reply.media[0].media_type === "image"
+              reply.media?.length > 0 &&
+              reply.media[0].media_type === "image"
                 ? `https://wooble.org/dms/${encodeFileName(reply.media[0].media_url)}`
                 : "";
 
@@ -189,24 +195,24 @@ const ReplySection: React.FC<ReplySectionProps> = ({ questionId, userId, onReply
                   <div className="flex gap-4 mt-3 text-sm text-gray-500">
                     <LikeButton
                       questionId={reply.answer_id}
-                      userId={userId}
+                      userId={reply.user_id}
                       initialLikes={reply.like_count}
                       initiallyLiked={false}
                       isReply
                     />
-                    <ReplyButton questionId={reply.answer_id} userId={userId} />
+                    <ReplyButton questionId={reply.answer_id} />
                   </div>
                 </div>
               </div>
             );
           })}
 
-          {!showAll && allReplies.length > 2 && (
+          {!showAllReplies && remainingReplies > 0 && (
             <button
-              onClick={() => setShowAll(true)}
+              onClick={() => setShowAllReplies(true)}
               className="text-sm text-blue-500 hover:underline"
             >
-              See more replies
+              +{remainingReplies} more repl{remainingReplies === 1 ? "y" : "ies"}
             </button>
           )}
         </>
@@ -236,21 +242,18 @@ const ReplySection: React.FC<ReplySectionProps> = ({ questionId, userId, onReply
           {posting ? "Posting..." : "Post"}
         </button>
       </div>
-      
-      {!isFullPage && allReplies?.length > 0 && !showAll && (
-  <div className="mt-3">
-    <a
-  href={`/replies/${questionId}?userId=${userId}`}
-  className="text-blue-500 text-sm hover:underline"
->
-  See All Replies
-</a>
 
-  </div>
-)}
-
-      </div>
-    
+      {!isFullPage && allReplies.length > 0 && (
+        <div className="mt-3">
+          <a
+            href={`/seeAllreplies?slug=${slug}`}
+            className="text-blue-500 text-sm hover:underline"
+          >
+            See All Replies
+          </a>
+        </div>
+      )}
+    </div>
   );
 };
 

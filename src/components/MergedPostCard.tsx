@@ -49,7 +49,6 @@ interface MergedPostCardProps {
 
 const API_DELETE_URL =
   "https://wooble.io/feed/discussion_api/delete_question.php";
-const USER_ID = 9168;
 
 const sanitizeMediaUrl = (url: string): string => {
   const fileName = url.split("/").pop() || url;
@@ -85,7 +84,9 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
     setDeleting(true);
     try {
       const formData = new URLSearchParams();
-      formData.append("user_id", USER_ID.toString());
+      // Eventually replace this with session-based user ID
+      const userId = post.user_id;
+      formData.append("user_id", userId.toString());
       formData.append("question_id", post.question_id.toString());
 
       const response = await axios.post(API_DELETE_URL, formData, {
@@ -119,132 +120,127 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
   };
 
   return (
-    <>
-      <div className="bg-white p-4 sm:p-5 mb-2 rounded-xl relative border border-gray-200">
-        {/* Profile Section */}
-        <div className="flex items-center gap-3 mb-3">
-          <div className="relative w-10 h-10 rounded-full overflow-hidden">
-            <Image
-              src={
-                post.profile_pic
-                  ? sanitizeMediaUrl(post.profile_pic)
-                  : "/default-avatar.png"
-              }
-              alt="User Avatar"
-              layout="fill"
-              objectFit="cover"
-              className="rounded-full"
-            />
-          </div>
-          <div>
-            <p className="text-sm sm:text-base font-semibold">
-              {post.is_anonymous ? "Anonymous" : post.name}
-            </p>
-            <p className="text-xs text-gray-500">
-              {new Date(post.timestamp).toLocaleString()}
-            </p>
-          </div>
-          <button
-            onClick={() =>
-              setShowMenu(showMenu === post.question_id ? null : post.question_id)
+    <div className="bg-white p-4 sm:p-5 mb-2 rounded-xl relative border border-gray-200">
+      {/* Profile Section */}
+      <div className="flex items-center gap-3 mb-3">
+        <div className="relative w-10 h-10 rounded-full overflow-hidden">
+          <Image
+            src={
+              post.profile_pic
+                ? sanitizeMediaUrl(post.profile_pic)
+                : "/default-avatar.png"
             }
-            className="ml-auto text-gray-600 hover:text-gray-800"
-          >
-            <MoreHorizontal size={20} />
-          </button>
+            alt="User Avatar"
+            layout="fill"
+            objectFit="cover"
+            className="rounded-full"
+          />
         </div>
+        <div>
+          <p className="text-sm sm:text-base font-semibold">
+            {post.is_anonymous ? "Anonymous" : post.name}
+          </p>
+          <p className="text-xs text-gray-500">
+            {new Date(post.timestamp).toLocaleString()}
+          </p>
+        </div>
+        <button
+          onClick={() =>
+            setShowMenu(showMenu === post.question_id ? null : post.question_id)
+          }
+          className="ml-auto text-gray-600 hover:text-gray-800"
+        >
+          <MoreHorizontal size={20} />
+        </button>
+      </div>
 
-        {/* Dropdown Menu */}
-        {showMenu === post.question_id && (
-          <div className="absolute right-4 top-10 mt-2 bg-white text-black shadow-lg rounded-lg p-2 w-36 border border-gray-200 z-10">
-            <button
-              onClick={handleCopyLink}
-              className="flex items-center gap-2 h-10 w-full p-2 rounded-lg hover:bg-gray-100"
-            >
-              <Copy size={16} />
-              <span>Copy Link</span>
-            </button>
-            <button
-              onClick={handleDeletePost}
-              disabled={deleting}
-              className="flex items-center gap-2 w-full p-2 rounded-lg hover:bg-gray-100 text-red-500"
-            >
-              <Trash size={16} />
-              <span>{deleting ? "Deleting..." : "Delete"}</span>
-            </button>
-          </div>
-        )}
-
-        {/* Post Text */}
-        <div
-          ref={contentRef}
-          className={`text-sm text-gray-800 leading-snug whitespace-pre-wrap break-words transition-all duration-300 pb-[2px] ${
-            showFullText ? "max-h-full" : "max-h-[150px] overflow-hidden"
-          }`}
-          dangerouslySetInnerHTML={{ __html: post.question_text }}
-        />
-        {isOverflowing && (
+      {/* Dropdown Menu */}
+      {showMenu === post.question_id && (
+        <div className="absolute right-4 top-10 mt-2 bg-white text-black shadow-lg rounded-lg p-2 w-36 border border-gray-200 z-10">
           <button
-            onClick={() => setShowFullText(!showFullText)}
-            className="text-blue-500 mt-2 text-sm hover:underline"
+            onClick={handleCopyLink}
+            className="flex items-center gap-2 h-10 w-full p-2 rounded-lg hover:bg-gray-100"
           >
-            {showFullText ? "See less" : "See full text"}
+            <Copy size={16} />
+            <span>Copy Link</span>
           </button>
-        )}
-
-        {/* Post Image */}
-        {post.media &&
-          post.media.length > 0 &&
-          post.media[0].media_type === "image" &&
-          post.media[0].media_url && (
-            <div
-              className="relative mt-3 cursor-pointer w-fit max-w-full"
-              onClick={() => setSelectedPost(post)}
-            >
-              <img
-                src={sanitizeMediaUrl(post.media[0].media_url)}
-                alt="Post Image"
-                className="rounded-xl object-contain max-w-full h-auto"
-                style={{ maxHeight: "500px" }}
-                onError={(e) => {
-                  e.currentTarget.style.display = "none";
-                }}
-              />
-            </div>
-          )}
-
-        {/* Post Actions */}
-        <div className="flex gap-2 mt-3 text-gray-600 text-sm">
-          <LikeButton
-            questionId={post.question_id}
-            userId={USER_ID}
-            initialLikes={post.likes_count}
-            initiallyLiked={post.is_liked}
-          />
-          <ShareButton
-            postUrl={`${window.location.origin}/post/${post.question_id}`}
-            postTitle={post.question_text}
-          />
-          <ReplyButton
-            questionId={post.question_id}
-            userId={USER_ID}
-            onClick={() => setShowReplies(!showReplies)}
-          />
+          <button
+            onClick={handleDeletePost}
+            disabled={deleting}
+            className="flex items-center gap-2 w-full p-2 rounded-lg hover:bg-gray-100 text-red-500"
+          >
+            <Trash size={16} />
+            <span>{deleting ? "Deleting..." : "Delete"}</span>
+          </button>
         </div>
+      )}
 
-        {/* Reply Section */}
-        {showReplies && (
-          <div className="mb-6 mt-0">
-            <ReplySection
-              questionId={post.question_id ?? 0}
-              userId={USER_ID}
-              onReply={() => {}}
-              isFullPage={false} 
+      {/* Post Text */}
+      <div
+        ref={contentRef}
+        className={`text-sm text-gray-800 leading-snug whitespace-pre-wrap break-words transition-all duration-300 pb-[2px] ${
+          showFullText ? "max-h-full" : "max-h-[150px] overflow-hidden"
+        }`}
+        dangerouslySetInnerHTML={{ __html: post.question_text }}
+      />
+      {isOverflowing && (
+        <button
+          onClick={() => setShowFullText(!showFullText)}
+          className="text-blue-500 mt-2 text-sm hover:underline"
+        >
+          {showFullText ? "See less" : "See full text"}
+        </button>
+      )}
+
+      {/* Post Image */}
+      {post.media?.[0]?.media_type === "image" &&
+        post.media[0].media_url && (
+          <div
+            className="relative mt-3 cursor-pointer w-fit max-w-full"
+            onClick={() => setSelectedPost(post)}
+          >
+            <img
+              src={sanitizeMediaUrl(post.media[0].media_url)}
+              alt="Post Image"
+              className="rounded-xl object-contain max-w-full h-auto"
+              style={{ maxHeight: "500px" }}
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
             />
           </div>
         )}
+
+      {/* Post Actions */}
+      <div className="flex gap-2 mt-3 text-gray-600 text-sm">
+        <LikeButton
+          userId={post.asked_by_user_id}
+          questionId={post.question_id}
+          initialLikes={post.likes_count}
+          initiallyLiked={post.is_liked}
+        />
+        <ShareButton
+          postUrl={`${window.location.origin}/post/${post.question_id}`}
+          postTitle={post.question_text}
+        />
+        <ReplyButton
+          questionId={post.question_id}
+          onClick={() => setShowReplies(!showReplies)}
+        />
       </div>
-    </>
+
+      {/* Reply Section */}
+      {showReplies && (
+        <div className="mb-6 mt-0">
+          <ReplySection
+            questionId={post.question_id ?? 0}
+            onReply={() => {}}
+            isFullPage={false}
+            slug={post.url ?? ""}
+          />
+        </div>
+      )}
+    </div>
   );
 };
 

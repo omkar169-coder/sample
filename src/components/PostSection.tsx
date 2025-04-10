@@ -222,3 +222,31 @@ const PostSection = ({ userId }: PostSectionProps) => {
 };
 
 export default PostSection;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{/* <img
+                  src={
+                    answer.answerer?.avatar
+                      ? sanitizeMediaUrl(answer.answerer.avatar)
+                      : defaultAvatarBase64
+                  }
+                  alt={answer.answerer?.name || "User"}
+                  className="object-cover rounded-full w-full h-full"
+                /> */}

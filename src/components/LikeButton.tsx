@@ -1,12 +1,15 @@
+"use client";
+
 import { useState } from "react";
 import { Heart } from "lucide-react";
+import axios from "axios";
 
 interface LikeButtonProps {
   questionId: number;
   userId: number;
   initialLikes: number;
   initiallyLiked: boolean;
-  isReply?: boolean; 
+  isReply?: boolean; // if you need this later
 }
 
 const LikeButton: React.FC<LikeButtonProps> = ({
@@ -17,37 +20,49 @@ const LikeButton: React.FC<LikeButtonProps> = ({
 }) => {
   const [liked, setLiked] = useState(initiallyLiked);
   const [likes, setLikes] = useState(initialLikes);
+  const [loading, setLoading] = useState(false);
 
   const handleLikeToggle = async () => {
+    if (!userId || !questionId) return;
+    setLoading(true);
+
     try {
-      const apiUrl = "https://wooble.io/feed/discussion_api/topic_like_dislike.php";
       const formData = new URLSearchParams();
       formData.append("user_id", userId.toString());
       formData.append("question_id", questionId.toString());
 
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: formData.toString(),
-      });
+      const res = await axios.post(
+        "https://wooble.io/feed/discussion_api/topic_like_dislike.php",
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
 
-      if (!response.ok) throw new Error(`Failed to toggle like: ${response.status}`);
-
-      const result = await response.json();
-
-      if (result.success) {
-        setLiked(!liked);
-        setLikes((prev) => (liked ? prev - 1 : prev + 1));
+      if (res.data.success) {
+        const action = res.data.action;
+        setLiked(action === "liked");
+        setLikes((prev) => (action === "liked" ? prev + 1 : prev - 1));
+      } else {
+        console.error("API error:", res.data);
       }
-    } catch (error) {
-      console.error("Error toggling like:", error);
+    } catch (err) {
+      console.error("Like toggle error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <button onClick={handleLikeToggle} className="flex items-center space-x-2 focus:outline-none">
+    <button
+      onClick={handleLikeToggle}
+      disabled={loading}
+      className="flex items-center space-x-2 focus:outline-none"
+    >
       <Heart
-        className="transition-all duration-300"
+        className={`transition-all duration-300 ${liked ? "text-red-500" : "text-gray-600"}`}
         size={22}
         color={liked ? "#e63946" : "#000"}
         fill={liked ? "#e63946" : "none"}

@@ -31,6 +31,7 @@ interface ReplySectionProps {
   slug: string;
   onReply: (newReply: Reply) => void;
   isFullPage?: boolean;
+  
 }
 
 const ReplySection: React.FC<ReplySectionProps> = ({

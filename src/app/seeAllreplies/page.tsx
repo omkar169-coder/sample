@@ -1,16 +1,16 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import Navbar from "@/components/navbar";
-import Mobileresponsivenavbar from "@/components/mobileresponsivenavbar";
-import Profilecard from "@/components/Profilecard";
-import ImportantLinks from "@/components/ImportantLinks";
 import ChannelsCard from "@/components/ChannelsCard";
+import ImportantLinks from "@/components/ImportantLinks";
+import Mobileresponsivenavbar from "@/components/mobileresponsivenavbar";
+import Navbar from "@/components/navbar";
+import Profilecard from "@/components/Profilecard";
 import ProfileSuggestions from "@/components/ProfileSuggestions";
-import UpgradeCard from "@/components/UpgradeCard";
 import SearchBar from "@/components/SearchBar";
 import SinglePostReplies from '@/components/SinglePostReplies';
+import UpgradeCard from "@/components/UpgradeCard";
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 const SeeAllReplies = () => {
   const searchParams = useSearchParams();
@@ -45,8 +45,7 @@ const SeeAllReplies = () => {
           <div className="mb-2">
               <SearchBar />
           </div>
-          <SinglePostReplies slug="your-post-slug"  />
-
+          <SinglePostReplies slug={slug} />
         </div>
 
         <div className="hidden lg:flex flex-col w-full max-w-[300px] space-y-3 overflow-hidden overflow-x-hidden">

@@ -1,5 +1,3 @@
-
-
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
@@ -19,6 +17,7 @@ interface Media {
 
 interface Post {
   question_id: number;
+  answer_id: number;
   asked_by_user_id: number;
   question_text: string;
   is_anonymous: number;
@@ -39,10 +38,13 @@ interface Post {
   comments_count: number;
   is_liked: boolean;
   media: Media[];
+  userid: number;
+  slug: string;
 }
 
 interface MergedPostCardProps {
   post: Post;
+  userId: number;
   showMenu: number | null;
   setShowMenu: React.Dispatch<React.SetStateAction<number | null>>;
   setPosts: React.Dispatch<React.SetStateAction<Post[]>>;
@@ -52,13 +54,16 @@ interface MergedPostCardProps {
 const API_DELETE_URL =
   "https://wooble.io/feed/discussion_api/delete_question.php";
 
-const sanitizeMediaUrl = (url: string): string => {
-  const fileName = url.split("/").pop() || url;
-  return `https://wooble.org/dms/${fileName}`;
-};
+  const sanitizeMediaUrl = (url: string): string => {
+    const fileName = url.split("/").pop() || url;
+    const encodedFileName = encodeURIComponent(fileName);
+    return `https://wooble.org/dms/${encodedFileName}`;
+  };
+  
 
 const MergedPostCard: React.FC<MergedPostCardProps> = ({
   post,
+  userId,
   showMenu,
   setShowMenu,
   setPosts,
@@ -125,7 +130,7 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
     <div className="bg-white p-4 sm:p-5 mb-2 rounded-xl relative border border-gray-200">
       {/* Profile Section */}
       <div className="flex items-center gap-3 mb-3">
-        <div className="relative w-10 h-10 rounded-full overflow-hidden">
+        {/* <div className="relative w-10 h-10 rounded-full overflow-hidden">
           <Image
             src={
               post.profile_pic
@@ -137,7 +142,20 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
             objectFit="cover"
             className="rounded-full"
           />
-        </div>
+        </div> */}
+        <div className="relative w-10 h-10 rounded-full overflow-hidden">
+        <Image
+          src={
+            post.profile_pic
+              ? sanitizeMediaUrl(post.profile_pic)
+              : "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
+          }
+          alt="User Avatar"
+          layout="fill"
+          objectFit="cover"
+          className="rounded-full"
+        />
+      </div>
         <div>
           <p className="text-sm sm:text-base font-semibold">
             {post.is_anonymous ? "Anonymous" : post.name}
@@ -218,6 +236,7 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
         <LikeButton
           userId={post.asked_by_user_id}
           questionId={post.question_id}
+          answerId={post.answer_id}
           initialLikes={post.likes_count}
           initiallyLiked={post.is_liked}
         />
@@ -227,6 +246,7 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
         />
         <ReplyButton
           questionId={post.question_id}
+          userId={userId}
           onClick={() => setShowReplies(!showReplies)}
         />
       </div>

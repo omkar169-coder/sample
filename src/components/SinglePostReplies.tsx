@@ -69,7 +69,9 @@ const SinglePostReplies = ({ slug }: Props) => {
     navigator.clipboard.writeText(postLink);
   };
   
-    const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+   // const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+   const [currentUserId, setCurrentUserId] = useState<number | undefined>(undefined);
+
 
 useEffect(() => {
   const storedUserId = localStorage.getItem("user_id");
@@ -121,7 +123,7 @@ useEffect(() => {
             src={
               question.questioner?.avatar
                 ? sanitizeMediaUrl(question.questioner.avatar)
-                : "/default-avatar.png"
+                : "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
             }
             alt="User Avatar"
             className="w-10 h-10 rounded-full object-cover"
@@ -213,12 +215,14 @@ useEffect(() => {
 
       {/* Like & Share Buttons */}
       <div className="flex gap-2 mt-4">
-        <LikeButton
-          userId={question.asked_by_user_id}
-          questionId={question.question_id}
-          initialLikes={question.likes_count}
-          initiallyLiked={question.is_liked}
-        />
+      <LikeButton
+        userId={currentUserId!} // Dynamically pass current user's ID
+        questionId={question.question_id} // Question ID for liking the question
+        //answerId={undefined} // Leave this as undefined for question likes
+        //answerId={answer.answer_id} // Pass the answer_id for replie
+        initialLikes={question.likes_count} // Initial like count for the question
+        initiallyLiked={question.is_liked} // Whether the question is liked by the user or not
+      />
         <ShareButton
           postTitle={question.question_text}
           postUrl={`${window.location.origin}/post/${question.question_id}`}
@@ -293,7 +297,7 @@ useEffect(() => {
                   src={
                     answer.answerer?.avatar
                       ? sanitizeMediaUrl(answer.answerer.avatar)
-                      : "/default-avatar.png"
+                      : "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
                   }
                   alt="User"
                   className="w-8 h-8 rounded-full object-cover"
@@ -315,12 +319,14 @@ useEffect(() => {
               />
               {/* Like & Share Buttons */}
               <div className="flex gap-2 mt-4">
-                  <LikeButton
-                    userId={question.asked_by_user_id}
-                    questionId={question.question_id}
-                    initialLikes={question.likes_count}
-                    initiallyLiked={question.is_liked}
-                  />
+              <LikeButton
+                userId={currentUserId!}
+                questionId={question.question_id}
+                answerId={answer.answer_id}
+                initialLikes={answer.like_count}
+                initiallyLiked={answer.is_liked} 
+                isReply={true}
+              />
                   <ShareButton
                     postTitle={question.question_text}
                     postUrl={`${window.location.origin}/post/${question.question_id}`}

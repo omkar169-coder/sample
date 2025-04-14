@@ -5,31 +5,39 @@ import { Heart } from "lucide-react";
 import axios from "axios";
 
 interface LikeButtonProps {
-  questionId: number;
+  questionId?: number; // optional for replies
+  answerId?: number;   // optional for questions
   userId: number;
   initialLikes: number;
   initiallyLiked: boolean;
-  isReply?: boolean; // if you need this later
+  isReply?: boolean; 
 }
 
 const LikeButton: React.FC<LikeButtonProps> = ({
   questionId,
+  answerId,
   userId,
   initialLikes,
   initiallyLiked,
+  isReply = false,
 }) => {
   const [liked, setLiked] = useState(initiallyLiked);
   const [likes, setLikes] = useState(initialLikes);
   const [loading, setLoading] = useState(false);
 
   const handleLikeToggle = async () => {
-    if (!userId || !questionId) return;
+    if (!userId || (isReply ? !answerId : !questionId)) return;
     setLoading(true);
 
     try {
       const formData = new URLSearchParams();
       formData.append("user_id", userId.toString());
-      formData.append("question_id", questionId.toString());
+
+      if (isReply && answerId) {
+        formData.append("answer_id", answerId.toString());
+      } else if (questionId) {
+        formData.append("question_id", questionId.toString());
+      }
 
       const res = await axios.post(
         "https://wooble.io/feed/discussion_api/topic_like_dislike.php",

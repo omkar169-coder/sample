@@ -3,10 +3,12 @@ import ReplySection from "@/components/ReplySection";
 
 interface ReplyButtonProps {
   questionId: number;
-  //userId: number;
+  userId: number;
   onClick?: () => void;
   className?: string;
   children?: React.ReactNode;
+  answerId?: number;
+  isReply?: boolean;
 }
 
 const ReplyButton: React.FC<ReplyButtonProps> = ({ questionId,  onClick }) => {

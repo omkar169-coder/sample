@@ -51,7 +51,7 @@ export default function UserDropdown({
           </div>
           <div className="border-t border-gray-200" />
           <div className="py-1">
-            <MenuItem icon={<LogOut size={18} />} label="Log out" />
+            <MenuItem icon={<LogOut size={18} />} label="Log in / Logout" />
           </div>
         </div>
       )}

@@ -13,6 +13,7 @@ interface Media {
 
 interface Post {
   question_id: number;
+  answer_id: number;
   asked_by_user_id: number;
   question_text: string;
   is_anonymous: number;
@@ -33,6 +34,8 @@ interface Post {
   comments_count: number;
   is_liked: boolean;
   media: Media[];
+  slug: string;
+  userid: number;
 }
 
 interface PostSectionProps {
@@ -41,7 +44,7 @@ interface PostSectionProps {
 
 const API_URL = "https://wooble.io/feed/discussion_api/fetch_personalised_questions.php";
 const CREATE_POST_URL = "https://wooble.io/feed/discussion_api/create_question.php";
-const DEFAULT_AVATAR = "/default-avatar.png";
+const DEFAULT_AVATAR = "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80";
 
 const encodeFileName = (filename: string): string => {
   try {
@@ -72,37 +75,103 @@ const PostSection = ({ userId }: PostSectionProps) => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState<number>(1); 
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const loadedPostIds = useRef<Set<number>>(new Set());
+  const [noMorePosts, setNoMorePosts] = useState(false);
+  const noNewPostsCounter = useRef(0);
+
+
+  
 
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, [page]); 
 
+  // const fetchPosts = async () => {
+  //   setLoading(true);
+  //   setError(null);
+  
+  //   try {
+  //     const params = {
+  //       limit: 100,
+  //       //offset: page * 20,
+  //       user_id: userId,
+  //       order: "random",
+  //     };
+  
+  //     const response = await axios.get(API_URL, {
+  //       params,
+  //       headers: { "Content-Type": "application/json" },
+  //     });
+  
+  //     if (response.data && response.data.success) {
+  //       const formattedPosts = response.data.data.map((post: Post) => {
+  //         const formattedProfilePic = post.profile_pic
+  //           ? `https://wooble.org/dms/${encodeFileName(post.profile_pic)}`
+  //           : DEFAULT_AVATAR;
+  
+  //         const formattedMedia = post.media.map((media) => ({
+  //           ...media,
+  //           media_url: `https://wooble.org/dms/${encodeFileName(media.media_url)}`,
+  //         }));
+  
+  //         return {
+  //           ...post,
+  //           profile_pic: formattedProfilePic,
+  //           media: formattedMedia,
+  //           timestamp: new Date(post.timestamp).toLocaleString(),
+  //         };
+  //       });
+  
+  //       const uniquePosts = formattedPosts.filter((post: Post) => {
+  //         if (loadedPostIds.current.has(post.question_id)) {
+  //           return false;
+  //         }
+  //         loadedPostIds.current.add(post.question_id);
+  //         return true;
+  //       });
+  
+  //       setPosts((prev) => [...prev, ...uniquePosts]);
+  //     } else {
+  //       setError(response.data?.message || "Failed to fetch posts.");
+  //     }
+  //   } catch (err: any) {
+  //     console.error("Axios Error:", err.response?.data || err.message);
+  //     setError("Error fetching posts.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const fetchPosts = async () => {
+    if (noMorePosts) return;
+  
     setLoading(true);
     setError(null);
+  
     try {
+      const params = {
+        limit: 150,
+        user_id: userId,
+        order: "random",
+      };
+  
       const response = await axios.get(API_URL, {
-        params: {
-          limit: 10,
-          offset: 10,
-          user_id: userId,
-          order: "random",
-        },
+        params,
         headers: { "Content-Type": "application/json" },
       });
-
+  
       if (response.data && response.data.success) {
         const formattedPosts = response.data.data.map((post: Post) => {
           const formattedProfilePic = post.profile_pic
             ? `https://wooble.org/dms/${encodeFileName(post.profile_pic)}`
             : DEFAULT_AVATAR;
-
+  
           const formattedMedia = post.media.map((media) => ({
             ...media,
             media_url: `https://wooble.org/dms/${encodeFileName(media.media_url)}`,
           }));
-
+  
           return {
             ...post,
             profile_pic: formattedProfilePic,
@@ -110,8 +179,22 @@ const PostSection = ({ userId }: PostSectionProps) => {
             timestamp: new Date(post.timestamp).toLocaleString(),
           };
         });
-
-        setPosts(formattedPosts);
+  
+        const uniquePosts = formattedPosts.filter((post: Post) => {
+          if (loadedPostIds.current.has(post.question_id)) return false;
+          loadedPostIds.current.add(post.question_id);
+          return true;
+        });
+  
+        if (uniquePosts.length === 0) {
+          noNewPostsCounter.current += 1;
+          if (noNewPostsCounter.current >= 3) {
+            setNoMorePosts(true);
+          }
+        } else {
+          noNewPostsCounter.current = 0;
+          setPosts((prev) => [...prev, ...uniquePosts]);
+        }
       } else {
         setError(response.data?.message || "Failed to fetch posts.");
       }
@@ -122,14 +205,13 @@ const PostSection = ({ userId }: PostSectionProps) => {
       setLoading(false);
     }
   };
-
+    
   
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && posts.length > 0) {
-          
-          setPosts((prev) => [...prev, ...prev]);
+        if (entries[0].isIntersecting && !loading) {
+          setPage((prev) => prev + 1); 
         }
       },
       { threshold: 1 }
@@ -144,7 +226,7 @@ const PostSection = ({ userId }: PostSectionProps) => {
         observer.unobserve(bottomRef.current);
       }
     };
-  }, [posts]);
+  }, [loading]);
 
   const handlePostCreation = async () => {
     if (!newPost.trim()) return;
@@ -169,7 +251,11 @@ const PostSection = ({ userId }: PostSectionProps) => {
       );
 
       if (response.data?.success) {
-        fetchPosts();
+        loadedPostIds.current.clear();
+        noNewPostsCounter.current = 0;
+        setNoMorePosts(false);
+        setPosts([]); // clear current posts
+        fetchPosts(); // fresh fetch
         setNewPost("");
         setImagePreview(null);
       } else {
@@ -182,16 +268,15 @@ const PostSection = ({ userId }: PostSectionProps) => {
   };
 
   return (
-     <div className="w-full max-w-3xl mx-auto bg-gray  rounded-xl ">   
-      
-      <PostComposer 
-        userId={userId} 
-        newPost={newPost} 
-        setNewPost={setNewPost} 
-        setImagePreview={setImagePreview} 
-        isAnonymous={isAnonymous} 
-        setIsAnonymous={setIsAnonymous} 
-        onPost={handlePostCreation} 
+    <div className="w-full max-w-3xl mx-auto bg-gray-100 rounded-xl">
+      <PostComposer
+        userId={userId}
+        newPost={newPost}
+        setNewPost={setNewPost}
+        setImagePreview={setImagePreview}
+        isAnonymous={isAnonymous}
+        setIsAnonymous={setIsAnonymous}
+        onPost={handlePostCreation}
       />
 
       {loading && <p className="text-center text-gray-500">Loading posts...</p>}
@@ -206,17 +291,27 @@ const PostSection = ({ userId }: PostSectionProps) => {
             setShowMenu={setShowMenu}
             setPosts={setPosts}
             setSelectedPost={setSelectedPost}
+            userId={post.user_id}
           />
         ))}
-        <div ref={bottomRef} className="h-1" />
-      </div>
-      {selectedPost && (
-  <FullCardView 
-    post={selectedPost} 
-    onClose={() => setSelectedPost(null)} 
-  />
-)}
 
+        {/* 👇 Intersection observer target */}
+        <div ref={bottomRef} className="h-1" />
+
+        {/* 👇 No more posts message */}
+        {noMorePosts && (
+          <div className="text-center text-gray-500 py-4">
+            🎉 You’ve seen all available posts!
+          </div>
+        )}
+      </div>
+
+      {selectedPost && (
+        <FullCardView
+          post={selectedPost}
+          onClose={() => setSelectedPost(null)}
+        />
+      )}
     </div>
   );
 };

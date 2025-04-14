@@ -22,10 +22,10 @@ const Navbar: React.FC = () => {
 
         <div className="flex items-center gap-4">
           
-          <button className="flex items-center text-gray-700 border border-gray-300 rounded-lg px-3 py-2 text-sm transition hover:bg-gray-100">
+          {/* <button className="flex items-center text-gray-700 border border-gray-300 rounded-lg px-3 py-2 text-sm transition hover:bg-gray-100">
             <PlusCircle className="w-5 h-5 mr-2" />
             Add Post
-          </button>
+          </button> */}
 
           <div className="relative">
             <Bell className="w-6 h-6 text-gray-600 hover:text-blue-600 cursor-pointer" />

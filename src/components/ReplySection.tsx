@@ -29,6 +29,7 @@ interface Reply {
 interface ReplySectionProps {
   questionId: number;
   slug: string;
+  userId?: number;
   onReply: (newReply: Reply) => void;
   isFullPage?: boolean;
   
@@ -143,7 +144,7 @@ const ReplySection: React.FC<ReplySectionProps> = ({
             const isLong = reply.answer_text.length > 300;
 
             const avatarSrc = reply.is_anonymous
-              ? "/default-avatar.png"
+              ? "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
               : reply.user_avatar
               ? `https://wooble.org/dms/${encodeFileName(reply.user_avatar)}`
               : "";
@@ -195,13 +196,15 @@ const ReplySection: React.FC<ReplySectionProps> = ({
                   )}
                   <div className="flex gap-4 mt-3 text-sm text-gray-500">
                     <LikeButton
+                     answerId={reply.answer_id}
                       questionId={reply.answer_id}
                       userId={reply.user_id}
                       initialLikes={reply.like_count}
                       initiallyLiked={false}
                       isReply
                     />
-                    <ReplyButton questionId={reply.answer_id} />
+                    {/* <ReplyButton questionId={reply.answer_id} /> */}
+                    <ReplyButton questionId={reply.answer_id} userId={reply.user_id} />
                   </div>
                 </div>
               </div>

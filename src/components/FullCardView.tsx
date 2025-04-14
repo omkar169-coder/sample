@@ -23,6 +23,7 @@ interface Post {
   likes_count: number;
   replies_count: number;
   timestamp: string;
+  slug: string;
 }
 
 interface FullCardViewProps {
@@ -76,7 +77,7 @@ const FullCardView: React.FC<FullCardViewProps> = ({ post, onClose }) => {
           {/* User Info */}
           <div className="flex items-center space-x-4">
             <img
-              src={post.profile_pic || "/default-avatar.png"}
+              src={post.profile_pic || "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"}
               alt="User"
               className="w-14 h-14 rounded-full object-cover"
             />
@@ -129,7 +130,7 @@ const FullCardView: React.FC<FullCardViewProps> = ({ post, onClose }) => {
           </div>
 
           {/* Reply Box */}
-          <div className="mt-4">
+          {/* <div className="mt-4">
             <textarea
               placeholder="Write a comment..."
               className="w-full border border-gray-300 rounded-lg p-3 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -143,7 +144,7 @@ const FullCardView: React.FC<FullCardViewProps> = ({ post, onClose }) => {
             >
               Post Reply
             </button>
-          </div>
+          </div> */}
 
           {/* Replies */}
           <div className="mt-4">
@@ -151,6 +152,7 @@ const FullCardView: React.FC<FullCardViewProps> = ({ post, onClose }) => {
               questionId={post.question_id}
               userId={post.user_id}
               onReply={handleReply}
+              slug={post.slug}
             />
           </div>
         </div>

@@ -9,7 +9,7 @@ import TimelineTab from '@/components/timelinetab';
 import ImpactZoneTab from '@/components/impactzonestab';
 import UrlInputModal from '@/components/urlinputmodal';
 import Edityourprofile from '@/components/Edityourprofile';
-import DescriptionCard from '@/components/DescriptionCard';  // Make sure path is correct.
+import DescriptionCard from '@/components/DescriptionCard';
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('Projects');
@@ -33,6 +33,22 @@ export default function ProfilePage() {
     location: 'Bhubaneshwar, Odisha, India',
     about: 'Be real—share your journey, your passions, and the moments that define you. Your unique story sparks genuine connections!',
   });
+
+  useEffect(() => {
+    // Load description from localStorage if it exists
+    const savedDescription = localStorage.getItem('userDescription');
+    if (savedDescription) {
+      setDescriptionInput(savedDescription);
+      setProfileData((prev) => ({ ...prev, about: savedDescription }));
+    }
+  }, []);
+
+  const handleDescriptionSubmit = (newDescription: string) => {
+    // Save the updated description in localStorage
+    localStorage.setItem('userDescription', newDescription);
+    setDescriptionInput(newDescription);
+    setProfileData((prev) => ({ ...prev, about: newDescription }));
+  };
 
   const tabs = [
     { name: 'Projects', icon: <Briefcase className="w-5 h-5 mr-2" /> },
@@ -82,7 +98,7 @@ export default function ProfilePage() {
             <div className="absolute -top-20 left-6 w-34 h-34 rounded-full bg-[#6154A4] border-4 border-white shadow-md flex items-center justify-center text-white text-4xl font-medium">
               M
             </div>
-
+              {/* plus - 1 */}
             <div className="absolute right-3 mt-5 top-0 cursor-pointer">
               <button className="text-blue-500 hover:text-blue-700 transition font-bold">
                 <Plus className="w-4.5 h-4.5 stroke-[6]" />
@@ -121,7 +137,7 @@ export default function ProfilePage() {
                 </button>
               </div>
             </div>
-
+              {/* plus -2 */}
             <div className="flex justify-end mt-4 text-sm text-gray-700 items-center gap-2">
               <span className="font-semibold">Skills</span>
               <span className="text-gray-400">No skills available</span>
@@ -134,20 +150,20 @@ export default function ProfilePage() {
 
         {/* Description Display Section */}
         <div className="bg-white rounded-2xl shadow-md p-6 flex justify-between items-start">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-800 mb-3">This is me</h2>
-            <p className="text-gray-700 mt-1">{profileData.about}</p>
-          </div>
-          <button
-            className="text-gray-700 hover:text-gray-900 transition"
-            onClick={() => {
-              setDescriptionInput(profileData.about);
-              setIsDescriptionEditOpen(true);
-            }}
-          >
-            <Pencil className="w-4 h-4" />
-          </button>
+        <div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-3">This is me</h2>
+          <p className="text-gray-700 mt-1">{profileData.about}</p>
         </div>
+        <button
+          className="text-gray-700 hover:text-gray-900 transition"
+          onClick={() => {
+            setDescriptionInput(profileData.about);
+            setIsDescriptionEditOpen(true);
+          }}
+        >
+          <Pencil className="w-4 h-4" />
+        </button>
+      </div>
 
         {/* Tabs Section */}
         <div className="bg-white shadow-md rounded-3xl p-6">

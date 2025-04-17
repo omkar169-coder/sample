@@ -48,10 +48,10 @@ const TimelineTab = () => {
   let lastYear: number | null = null;
 
   return (
-    <div className="flex p-18 bg-gray-50 min-h-[20vh]">
-      <div className="relative ml-12">
-        {/* Main vertical timeline line aligned to the left */}
-        <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-black"></div>
+    <div className="flex justify-center px-4 py-10 bg-gray-50 min-h-[20vh]">
+      <div className="relative w-full max-w-5xl">
+        {/* Vertical line */}
+        <div className="absolute left-4 md:left-8 top-0 bottom-0 w-0.5 bg-black"></div>
   
         {sorted.map((item) => {
           const currentYear = getYear(item.date);
@@ -60,36 +60,39 @@ const TimelineTab = () => {
   
           return (
             <div key={item.id} className="relative flex flex-col items-start mt-10 mb-14">
-  
+              {/* Year label */}
               {showYear && (
                 <div className="flex items-start mb-6 mt-3 relative">
-                  {/* Gap in the line behind the year */}
-                  <div className="absolute left-4 top-[-2rem] w-0.5 h-[2rem] bg-gray-50 z-10"></div>
-  
-                  {/* Year label - aligned to the left of the line */}
-                  <div className="text-2xl font-bold bg-gray-50 absolute -left-3.9 -top-8 z-20 whitespace-nowrap">
+                  <div className="absolute left-4 md:left-8 top-[-2rem] w-0.5 h-[2rem] bg-gray-50 z-10"></div>
+                  <div className="text-xl md:text-2xl font-bold bg-gray-50 absolute -left-2 md:-left-3.5 -top-8 z-20 whitespace-nowrap">
                     {currentYear}
                   </div>
                 </div>
               )}
   
-              {/* Dot on the vertical line */}
-              <div className="absolute mt-10 ml-4 -left-4 top-10 w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-sm font-semibold z-20">
+              {/* Dot */}
+              <div className="absolute ml-4 md:ml-8 -left-4 md:-left-4 top-10 w-6 h-6 md:w-8 md:h-8 rounded-full bg-black text-white flex items-center justify-center text-xs md:text-sm font-semibold z-20">
                 {item.id}
               </div>
   
-              {/* Card aligned left of the timeline */}
-              <div className="ml-20 p-5 w-[600px] bg-white shadow-md rounded-lg flex items-start gap-4 relative z-10">
-                <img src={item.logo} alt={item.title} className="w-30 h-30 object-contain" />
+              {/* Timeline Card */}
+              <div className="ml-16 md:ml-24 p-4 md:p-6 w-full bg-white shadow-md rounded-lg flex flex-col md:flex-row items-start gap-4 relative z-10">
+                <img
+                  src={item.logo}
+                  alt={item.title}
+                  className="w-20 h-20 md:w-28 md:h-28 object-contain"
+                />
                 <div>
-                  <div className="text-sm text-gray-500">{item.date}</div>
-                  <h3 className="font-semibold text-lg">{item.title}</h3>
+                  <div className="text-xs md:text-sm text-gray-500">{item.date}</div>
+                  <h3 className="font-semibold text-base md:text-lg">{item.title}</h3>
                   <p className="text-sm text-gray-700">{item.company}</p>
-                  <span className={`inline-block mt-2 px-2 py-1 text-xs rounded ${
-                    item.type === 'Education'
-                      ? 'bg-red-100 text-red-600'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
+                  <span
+                    className={`inline-block mt-2 px-2 py-1 text-xs rounded ${
+                      item.type === 'Education'
+                        ? 'bg-red-100 text-red-600'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}
+                  >
                     {item.type}
                   </span>
                   <p className="text-sm text-gray-600 mt-2">{item.description}</p>
@@ -101,7 +104,6 @@ const TimelineTab = () => {
       </div>
     </div>
   );
-  
-};
+}  
 
 export default TimelineTab;

@@ -12,24 +12,24 @@ const DescriptionCard: React.FC<Props> = ({ description, onClose, onSubmit }) =>
   const [inputValue, setInputValue] = React.useState(description);
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-2xl w-[800px] h-[400px] relative flex flex-col justify-between">
+    <div className="bg-white p-6 rounded-2xl shadow-2xl w-[90%] max-w-[800px] h-[80vh] max-h-[400px] relative flex flex-col justify-between">
       {/* Close Button */}
       <button
         onClick={onClose}
-        className="absolute top-5 right-5 text-black hover:text-gray-700"
+        className="absolute top-4 right-4 text-black hover:text-gray-700"
       >
         <X size={24} />
       </button>
 
       {/* Title */}
-      <h1 className="text-2xl font-bold text-black">Description</h1>
+      <h1 className="text-xl md:text-2xl font-bold text-black">Description</h1>
 
       {/* Description Box */}
       <div className="flex-1 mt-4">
         <textarea
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          className="w-full h-full p-4 rounded-lg bg-gray-200 text-gray-700 overflow-auto"
+          className="w-full h-full p-4 rounded-lg bg-gray-200 text-gray-700 resize-none"
         />
       </div>
 

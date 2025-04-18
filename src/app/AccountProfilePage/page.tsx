@@ -6,6 +6,7 @@ import { Briefcase, List, LineChart, Plus, MapPin, Pencil } from 'lucide-react';
 import FooterLinks from '@/components/footerlinks';
 import MobileResponsiveNavbar from '@/components/mobileresponsivenavbar';
 import ProjectsTab from '@/components/projectstab';
+import AddSkills from '@/components/addskills';
 import TimelineTab from '@/components/timelinetab';
 import ImpactZoneTab from '@/components/impactzonestab';
 import UrlInputModal from '@/components/urlinputmodal';
@@ -72,9 +73,12 @@ export default function ProfilePage() {
   const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
   const [isDescriptionEditOpen, setIsDescriptionEditOpen] = useState(false);
   const [descriptionInput, setDescriptionInput] = useState('');
-  const [socialLinks, setSocialLinks] = useState<{ platform: string; url: string }[]>([]);
+  const [socialLinks, setSocialLinks] = useState<{ platform: string; url: string; show: boolean }[]>([]);
   const [isSocialMediaModalOpen, setIsSocialMediaModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
+
+  const [showAddSkills, setShowAddSkills] = useState(false);
+
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024); // Mobile size threshold
@@ -93,27 +97,57 @@ export default function ProfilePage() {
   useEffect(() => {
     const savedLinks = localStorage.getItem('socialLinks');
     if (savedLinks) {
-      setSocialLinks(JSON.parse(savedLinks));
+      const parsedLinks = JSON.parse(savedLinks);
+      // Ensure every link has the 'show' property
+      const linksWithShow = parsedLinks.map((link: { platform: string; url: string; show: boolean }) => ({
+        ...link,
+        show: true,  // Add 'show' property here
+      }));
+      setSocialLinks(linksWithShow);
     }
   }, []);
+  
 
   // Save social media links to localStorage
 
-const handleSaveSocialLinks = (updatedLinks: Record<string, string>) => {
-  const formattedLinks = Object.entries(updatedLinks).map(([platform, url]) => ({
-    platform,
-    url,
-    show: true, // Assuming links should be visible by default, adjust if necessary
-  }));
 
-  // Merge new links with existing ones to preserve previous URLs
-  const updatedSocialLinks = [...socialLinks, ...formattedLinks];
+  const handleSaveSocialLinks = (updatedLinks: Record<string, string>) => {
+    // Map only the links you want to display
+    const formattedLinks = Object.entries(updatedLinks).map(([platform, url]) => ({
+      platform,
+      url,
+      show: false,  // Always true because the onSave only passes shown links
+    }));
+  
 
-  // Update the state and save to localStorage
-  setSocialLinks(updatedSocialLinks);
-  localStorage.setItem('socialLinks', JSON.stringify(updatedSocialLinks));
-  setIsSocialMediaModalOpen(false); // Close modal after saving
-};
+    const uniqueLinksMap = new Map<string, { platform: string; url: string; show: boolean }>();
+  
+    [...socialLinks, ...formattedLinks].forEach(link => {
+    
+      if (uniqueLinksMap.has(link.platform)) {
+        const existing = uniqueLinksMap.get(link.platform)!;
+        uniqueLinksMap.set(link.platform, { ...existing, url: link.url });
+      } else {
+        uniqueLinksMap.set(link.platform, link);
+      }
+    });
+  
+    const uniqueLinks = Array.from(uniqueLinksMap.values());
+  
+    setSocialLinks(uniqueLinks);
+    localStorage.setItem('socialLinks', JSON.stringify(uniqueLinks));
+    setIsSocialMediaModalOpen(false);
+  };
+  
+
+  const handleToggleShow = (platform: string) => {
+    const updatedLinks = socialLinks.map(link =>
+      link.platform === platform ? { ...link, show: !link.show } : link
+    );
+    setSocialLinks(updatedLinks);
+    localStorage.setItem('socialLinks', JSON.stringify(updatedLinks));
+  };
+  
 
 
   const [profileData, setProfileData] = useState({
@@ -157,14 +191,14 @@ const handleSaveSocialLinks = (updatedLinks: Record<string, string>) => {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const scale = Math.min(800 / img.width, 800 / img.height, 1); // Resize max to 800px
+          const scale = Math.min(800 / img.width, 800 / img.height, 1); 
           canvas.width = img.width * scale;
           canvas.height = img.height * scale;
   
           const ctx = canvas.getContext('2d');
           if (ctx) {
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7); // Compress to 70% quality
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7); 
             setImageUrl(compressedBase64);
             localStorage.setItem('profileCoverImage', compressedBase64);
           }
@@ -201,24 +235,27 @@ const handleSaveSocialLinks = (updatedLinks: Record<string, string>) => {
             <div className="absolute -top-20 left-6 w-34 h-34 rounded-full bg-[#6154A4] border-4 border-white shadow-md flex items-center justify-center text-white text-4xl font-medium">
               M
             </div>
-  
+
+
             {/* plus - 1 */}
             <div className="absolute right-3 mt-5 top-0 flex items-center space-x-2">
-              {socialLinks.map((link, index) => {
-                const IconComponent = IconMap[link.platform as keyof typeof IconMap];
-                return (
-                  <a
-                    key={index}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-800"
-                    title={link.platform}
-                  >
-                    {IconComponent && <IconComponent className="w-5 h-5" />}
-                  </a>
-                );
-              })}
+              {socialLinks
+                .filter(link => link.show) 
+                .map((link, index) => {
+                  const IconComponent = IconMap[link.platform as keyof typeof IconMap];
+                  return (
+                    <a
+                      key={index}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800"
+                      title={link.platform}
+                    >
+                      {IconComponent && <IconComponent className="w-5 h-5" />}
+                    </a>
+                  );
+                })}
               <button
                 className="text-blue-500 hover:text-blue-700 transition font-bold"
                 onClick={() => setIsSocialMediaModalOpen(true)}
@@ -226,7 +263,7 @@ const handleSaveSocialLinks = (updatedLinks: Record<string, string>) => {
                 <Plus className="w-4.5 h-4.5 stroke-[6]" />
               </button>
             </div>
-  
+
             {isSocialMediaModalOpen && (
               <div className="fixed inset-0 flex justify-center items-center z-50">
                 <div className="bg-white rounded-lg shadow-md max-w-md w-full">
@@ -276,10 +313,15 @@ const handleSaveSocialLinks = (updatedLinks: Record<string, string>) => {
             <div className="flex justify-end mt-4 text-sm text-gray-700 items-center gap-2">
               <span className="font-semibold">Skills</span>
               <span className="text-gray-400">No skills available</span>
-              <button className="text-blue-500 hover:text-blue-700 transition font-bold">
+              <button
+                className="text-blue-500 hover:text-blue-700 transition font-bold"
+                onClick={() => setShowAddSkills(true)}
+              >
                 <Plus className="w-4.5 h-4.5 stroke-[6]" />
               </button>
             </div>
+
+
           </div>
         </div>
   
@@ -357,7 +399,16 @@ const handleSaveSocialLinks = (updatedLinks: Record<string, string>) => {
             }}
           />
         )}
-  
+
+        {/* Conditional rendering of AddSkills */}
+        {showAddSkills && (
+          <div className="fixed inset-0 b z-50 flex items-center justify-center">
+            <div className="relative">
+              <AddSkills handleClose={() => setShowAddSkills(false)} />
+            </div>
+          </div>
+        )}  
+
         {isDescriptionEditOpen && (
           <div className="fixed inset-0 bg-black/40 bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-md p-6 max-w-md w-full">

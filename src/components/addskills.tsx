@@ -2,12 +2,16 @@
 
 import React, { useState } from "react";
 
-const AddSkills = () => {
-  const [skill, setSkill] = useState("");
-  const [source, setSource] = useState("");
-  const [customSource, setCustomSource] = useState("");
-  const [skillsList, setSkillsList] = useState<{ skill: string; source: string }[]>([]);
-
+interface AddSkillsProps {
+    handleClose: () => void;
+    
+  }
+  
+  const AddSkills: React.FC<AddSkillsProps> = ({ handleClose }) => {
+    const [skill, setSkill] = useState("");
+    const [source, setSource] = useState("");
+    const [customSource, setCustomSource] = useState("");
+    const [skillsList, setSkillsList] = useState<{ skill: string; source: string }[]>([]);
   const yourSkills = [
     "JavaScript", "HTML", "CSS", "Python", "Java", "C++", "C#", "SQL", "Git",
     "React", "Node.js", "Android Development", "iOS Development", "PHP",
@@ -75,6 +79,7 @@ const AddSkills = () => {
     "Personal Branding", "Emotional Resilience", "Positive Psychology"
   ];
 
+ 
   const filteredSuggestions = skill
     ? yourSkills.filter(
         (s) =>
@@ -85,7 +90,6 @@ const AddSkills = () => {
 
   const handleAddSkill = () => {
     const finalSource = source === "Other" ? customSource.trim() : source;
-
     if (skill.trim() && finalSource) {
       setSkillsList((prev) => [...prev, { skill: skill.trim(), source: finalSource }]);
       setSkill("");
@@ -103,11 +107,17 @@ const AddSkills = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-12 p-8 bg-white rounded-3xl shadow-2xl">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Add Your Skills</h2>
-        <button className="text-3xl leading-none text-gray-400 hover:text-gray-600">&times;</button>
-      </div>
+    <div className="max-w-4xl mx-auto p-8 bg-white rounded-3xl shadow-2xl">
+        <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-800">Add Your Skills</h2>
+            <button
+            onClick={handleClose}
+            className="text-3xl leading-none ml-38 text-gray-400 hover:text-gray-600"
+            >
+            ×
+            </button>
+        </div>
+
 
       <div className="mb-5 relative">
         <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -117,7 +127,7 @@ const AddSkills = () => {
           type="text"
           value={skill}
           onChange={(e) => setSkill(e.target.value)}
-          placeholder="Type a skill (e.g., React, JavaScript)"
+          placeholder="One time only one skill name ex- React or communication"
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-gray-50"
         />
         {filteredSuggestions.length > 0 && (
@@ -136,7 +146,7 @@ const AddSkills = () => {
       </div>
 
       <div className="mb-5">
-        <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <label className="block text-sm font-semibold mt-15 text-gray-700 mb-2">
           Where did you learn this skill?
         </label>
         <select
@@ -164,34 +174,33 @@ const AddSkills = () => {
       </div>
 
       {skillsList.length > 0 && (
-  <div className="mb-5">
-    <h3 className="text-sm font-semibold text-gray-700 mb-2">Added Skills</h3>
-    <ul className="flex flex-wrap gap-2">
-      {skillsList.map((item, index) => (
-        <li
-          key={index}
-          className="flex items-center bg-blue-50 border border-blue-200 rounded-full text-sm px-3 py-1"
-        >
-          <span className="mr-2">{item.skill}</span>
-          <button
-            onClick={() => handleDeleteSkill(index)}
-            className="text-red-500 hover:text-red-700 text-base leading-none"
-          >
-            &times;
-          </button>
-        </li>
-      ))}
-    </ul>
-  </div>
-)}
-
+        <div className="mb-5">
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">Added Skills</h3>
+          <ul className="flex flex-wrap gap-2">
+            {skillsList.map((item, index) => (
+              <li
+                key={index}
+                className="flex items-center bg-blue-50 border border-blue-200 rounded-full text-sm px-3 py-1"
+              >
+                <span className="mr-2">{item.skill}</span>
+                <button
+                  onClick={() => handleDeleteSkill(index)}
+                  className="text-red-500 hover:text-red-700 text-base leading-none"
+                >
+                  &times;
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <button
         onClick={handleAddSkill}
         disabled={!skill.trim() || !source || (source === "Other" && !customSource.trim())}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-semibold transition"
       >
-        SAVE SKILLS
+        Add Skill
       </button>
     </div>
   );

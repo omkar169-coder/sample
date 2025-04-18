@@ -93,7 +93,7 @@ interface SocialMediaIconsProps {
   onSave: (updatedLinks: Record<string, string>) => void; // <- Add this
 }
 
-const SocialMediaIcons: React.FC<SocialMediaIconsProps> = ({ showCard, setShowCard, onSave }) => {
+const SocialMediaIcons: React.FC<SocialMediaIconsProps> = ({ showCard, setShowCard, onSave } ) => {
   const [links, setLinks] = useState<SocialLink[]>([]);
 
   // Load links from localStorage
@@ -125,44 +125,95 @@ const SocialMediaIcons: React.FC<SocialMediaIconsProps> = ({ showCard, setShowCa
 
   const updateUrl = (index: number, newUrl: string) => {
     const cleanedUrl = newUrl.trim().toLowerCase();
-    const isDuplicate = links.some((link, i) => i !== index && link.url.trim().toLowerCase() === cleanedUrl);
   
-    if (isDuplicate) {
-      alert("You're already using this URL.");
+    // Basic URL pattern: starts with http(s) or www
+    const urlPattern = /^(https?:\/\/|www\.)[^\s]+$/;
+  
+    if (!urlPattern.test(cleanedUrl)) {
+      const updated = [...links];
+      updated[index].url = "";
+      updated[index].platform = null;
+      updated[index].show = false;
+      setLinks(updated);
       return;
     }
+  
+    // Allow reuse if the existing one is hidden (show = false)
+    // const isDuplicate = links.some((link, i) =>
+    //   i !== index && link.url.trim().toLowerCase() === cleanedUrl && link.show
+    // );
+  
+    // if (isDuplicate) {
+    //   alert("You're already using this URL.");
+    //   return;
+    // }
   
     const updated = [...links];
     updated[index].url = newUrl;
     updated[index].platform = detectPlatform(newUrl);
+    updated[index].show = updated[index].platform !== null;
+    setLinks(updated);
+  };
+  
+  const toggleShow = (index: number) => {
+    const updated = [...links];
+    updated[index].show = !updated[index].show;
     setLinks(updated);
   };
   
 
-  const toggleShow = (index: number) => {
+
+  const handlePlatformChange = (index: number, platform: SocialPlatform) => {
     const updated = [...links];
-    updated[index].show = !updated[index].show;
-  
-    // If toggled off, remove it completely
-    if (!updated[index].show) {
-      updated.splice(index, 1);
-    }
-  
-    setLinks(updated.length > 0 ? updated : [{ platform: null, url: '', show: true }]);
+    updated[index].platform = platform;
+    setLinks(updated);
   };
-  
+  const handleUrlChange = (index: number, url: string) => {
+    const updated = [...links];
+    updated[index].url = url;
+    setLinks(updated);
+  };
+  const handleShowChange = (index: number, show: boolean) => {
+    const updated = [...links];   
+    updated[index].show = show;
+    setLinks(updated);
+  };
+
 
   const removeLink = (index: number) => {
     const updated = [...links];
     updated.splice(index, 1);
-    setLinks(updated.length > 0 ? updated : [{ platform: null, url: '', show: true }]);
+    setLinks(updated.length > 0 ? updated : [{ platform: null, url: '', show: false }]);
   };
 
   const addLink = () => {
     setLinks([...links, { platform: null, url: '', show: true }]);
   };
 
+  // const saveLinks = () => {
+  //   const formatted = links
+  //     .filter(link => link.platform && link.url && link.show)
+  //     .reduce((acc, curr) => {
+  //       if (curr.platform) {
+  //         acc[curr.platform] = curr.url;
+  //       }
+  //       return acc;
+  //     }, {} as Record<string, string>);
+      
+  //     localStorage.setItem('socialLinks', JSON.stringify(
+  //       links.filter(link => link.platform && link.url && link.show) 
+  //     ));
+
+  //   onSave(formatted); 
+  // };
+
+
+
   const saveLinks = () => {
+    // Save all links, including show status
+    localStorage.setItem('socialLinks', JSON.stringify(links));
+  
+    // Filter for those that should be shown and prepare for parent
     const formatted = links
       .filter(link => link.platform && link.url && link.show)
       .reduce((acc, curr) => {
@@ -171,9 +222,11 @@ const SocialMediaIcons: React.FC<SocialMediaIconsProps> = ({ showCard, setShowCa
         }
         return acc;
       }, {} as Record<string, string>);
-
-    onSave(formatted); // Pass updated links to the parent
+  
+    onSave(formatted);
   };
+  
+  
 
   return (
     <div className="relative bg-white shadow-2xl rounded-2xl w-full max-w-2xl p-6">
@@ -203,10 +256,11 @@ const SocialMediaIcons: React.FC<SocialMediaIconsProps> = ({ showCard, setShowCa
               placeholder="Paste your social media URL"
               className="flex-grow p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
+ 
             <label className="flex items-center cursor-pointer ml-2">
               <input
                 type="checkbox"
-                checked={link.show}
+                checked={!!link.show}  // force boolean
                 onChange={() => toggleShow(index)}
                 className="hidden"
               />
@@ -222,6 +276,7 @@ const SocialMediaIcons: React.FC<SocialMediaIconsProps> = ({ showCard, setShowCa
                 />
               </div>
             </label>
+
             <button
               onClick={() => removeLink(index)}
               className="text-red-500 hover:text-red-700 text-xl font-bold ml-2"

@@ -17,7 +17,7 @@ const DescriptionCard: React.FC<Props> = ({ description, onClose, onSubmit }) =>
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-2xl w-[90%] max-w-[800px] h-[80vh] max-h-[400px] relative flex flex-col justify-between">
-      {/* Close Button */}
+
       <button
         onClick={onClose}
         className="absolute top-4 right-4 text-black hover:text-gray-700"
@@ -25,10 +25,10 @@ const DescriptionCard: React.FC<Props> = ({ description, onClose, onSubmit }) =>
         <X size={24} />
       </button>
 
-      {/* Title */}
+
       <h1 className="text-xl md:text-2xl font-bold text-black">Description</h1>
 
-      {/* Description Box */}
+
       <div className="flex-1 mt-4">
         <textarea
           value={inputValue}
@@ -37,7 +37,7 @@ const DescriptionCard: React.FC<Props> = ({ description, onClose, onSubmit }) =>
         />
       </div>
 
-      {/* Submit Button */}
+
       <button
         className="mt-6 bg-[#4267B2] text-white py-3 rounded-md hover:bg-[#365899] transition-all"
         onClick={() => onSubmit(inputValue)}
@@ -49,3 +49,6 @@ const DescriptionCard: React.FC<Props> = ({ description, onClose, onSubmit }) =>
 };
 
 export default DescriptionCard;
+
+
+

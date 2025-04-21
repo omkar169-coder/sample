@@ -76,7 +76,8 @@ const TimelineTab = () => {
               </div>
   
               {/* Timeline Card */}
-              <div className="ml-16 md:ml-24 p-4 md:p-6 w-full bg-white shadow-md rounded-lg flex flex-col md:flex-row items-start gap-4 relative z-10">
+              <div className="ml-16 md:ml-24 p-4 md:p-6 bg-white shadow-md rounded-lg flex flex-col md:flex-row items-start gap-4 relative z-10
+                w-[90%] max-w-[700px] sm:w-[85%] md:w-[75%] lg:w-[65%] xl:w-[50%]">
                 <img
                   src={item.logo}
                   alt={item.title}

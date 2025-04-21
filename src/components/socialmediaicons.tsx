@@ -81,36 +81,32 @@ const IconMap = {
 
 type SocialPlatform = keyof typeof IconMap;
 
-type SocialLink = {
-  platform: SocialPlatform | null;
+type SocialMediaIconsProps = {
+  showCard: boolean;
+  setShowCard: React.Dispatch<React.SetStateAction<boolean>>;
+  onSave: (updatedLinks: Record<string, string>) => void;
+  onToggleShow: (platform: string) => void;
+  existingLinks: SocialLinkType[];
+};
+
+type SocialLinkType = {
+  platform: string | null;
   url: string;
   show: boolean;
 };
 
-interface SocialMediaIconsProps {
-  showCard: boolean;
-  setShowCard: React.Dispatch<React.SetStateAction<boolean>>;
-  onSave: (updatedLinks: Record<string, string>) => void; // <- Add this
-}
+const SocialMediaIcons: React.FC<SocialMediaIconsProps> = ({ showCard, setShowCard, onSave, existingLinks }) => {
+  const [links, setLinks] = useState<SocialLinkType[]>(existingLinks);
 
-const SocialMediaIcons: React.FC<SocialMediaIconsProps> = ({ showCard, setShowCard, onSave } ) => {
-  const [links, setLinks] = useState<SocialLink[]>([]);
-
-  // Load links from localStorage
   useEffect(() => {
-    const savedLinks = localStorage.getItem('socialLinks');
-    if (savedLinks) {
-      setLinks(JSON.parse(savedLinks));
-    } else {
-      setLinks([{ platform: null, url: '', show: true }]); // Default empty link if nothing is saved
+    // Update state if existingLinks is passed as a prop.
+    if (existingLinks.length > 0) {
+      setLinks(existingLinks);
     }
-  }, []);
+  }, [existingLinks]);
 
-  // Save links to localStorage whenever they change
   useEffect(() => {
-    if (links.length > 0) {
-      localStorage.setItem('socialLinks', JSON.stringify(links));
-    }
+    localStorage.setItem('socialLinks', JSON.stringify(links));
   }, [links]);
 
   const detectPlatform = (url: string): SocialPlatform | null => {
@@ -125,10 +121,9 @@ const SocialMediaIcons: React.FC<SocialMediaIconsProps> = ({ showCard, setShowCa
 
   const updateUrl = (index: number, newUrl: string) => {
     const cleanedUrl = newUrl.trim().toLowerCase();
-  
-    // Basic URL pattern: starts with http(s) or www
+
     const urlPattern = /^(https?:\/\/|www\.)[^\s]+$/;
-  
+
     if (!urlPattern.test(cleanedUrl)) {
       const updated = [...links];
       updated[index].url = "";
@@ -137,48 +132,25 @@ const SocialMediaIcons: React.FC<SocialMediaIconsProps> = ({ showCard, setShowCa
       setLinks(updated);
       return;
     }
-  
-    // Allow reuse if the existing one is hidden (show = false)
-    // const isDuplicate = links.some((link, i) =>
-    //   i !== index && link.url.trim().toLowerCase() === cleanedUrl && link.show
-    // );
-  
-    // if (isDuplicate) {
-    //   alert("You're already using this URL.");
-    //   return;
-    // }
-  
+
     const updated = [...links];
     updated[index].url = newUrl;
     updated[index].platform = detectPlatform(newUrl);
     updated[index].show = updated[index].platform !== null;
     setLinks(updated);
   };
-  
+
   const toggleShow = (index: number) => {
     const updated = [...links];
     updated[index].show = !updated[index].show;
-    setLinks(updated);
-  };
-  
 
+    const platform = updated[index].platform;
+    if (platform && typeof window !== "undefined") {
+      localStorage.setItem(`toggle-${platform}`, JSON.stringify(updated[index].show));
+    }
 
-  const handlePlatformChange = (index: number, platform: SocialPlatform) => {
-    const updated = [...links];
-    updated[index].platform = platform;
     setLinks(updated);
   };
-  const handleUrlChange = (index: number, url: string) => {
-    const updated = [...links];
-    updated[index].url = url;
-    setLinks(updated);
-  };
-  const handleShowChange = (index: number, show: boolean) => {
-    const updated = [...links];   
-    updated[index].show = show;
-    setLinks(updated);
-  };
-
 
   const removeLink = (index: number) => {
     const updated = [...links];
@@ -190,30 +162,7 @@ const SocialMediaIcons: React.FC<SocialMediaIconsProps> = ({ showCard, setShowCa
     setLinks([...links, { platform: null, url: '', show: true }]);
   };
 
-  // const saveLinks = () => {
-  //   const formatted = links
-  //     .filter(link => link.platform && link.url && link.show)
-  //     .reduce((acc, curr) => {
-  //       if (curr.platform) {
-  //         acc[curr.platform] = curr.url;
-  //       }
-  //       return acc;
-  //     }, {} as Record<string, string>);
-      
-  //     localStorage.setItem('socialLinks', JSON.stringify(
-  //       links.filter(link => link.platform && link.url && link.show) 
-  //     ));
-
-  //   onSave(formatted); 
-  // };
-
-
-
   const saveLinks = () => {
-    // Save all links, including show status
-    localStorage.setItem('socialLinks', JSON.stringify(links));
-  
-    // Filter for those that should be shown and prepare for parent
     const formatted = links
       .filter(link => link.platform && link.url && link.show)
       .reduce((acc, curr) => {
@@ -222,15 +171,12 @@ const SocialMediaIcons: React.FC<SocialMediaIconsProps> = ({ showCard, setShowCa
         }
         return acc;
       }, {} as Record<string, string>);
-  
+
     onSave(formatted);
   };
-  
-  
 
   return (
     <div className="relative bg-white shadow-2xl rounded-2xl w-full max-w-2xl p-6">
-      {/* Close Button */}
       <button
         onClick={() => setShowCard(false)}
         className="absolute top-3 right-3 text-gray-500 hover:text-red-600 text-2xl font-bold focus:outline-none"
@@ -240,7 +186,11 @@ const SocialMediaIcons: React.FC<SocialMediaIconsProps> = ({ showCard, setShowCa
       <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Social Media Links</h2>
 
       {links.map((link, index) => {
-        const IconComponent = link.platform ? IconMap[link.platform] : null;
+        if (!link.show) return null;
+
+
+        const IconComponent = link.platform ? IconMap[link.platform as keyof typeof IconMap] : null;
+
         return (
           <div
             key={index}
@@ -254,13 +204,15 @@ const SocialMediaIcons: React.FC<SocialMediaIconsProps> = ({ showCard, setShowCa
               value={link.url}
               onChange={(e) => updateUrl(index, e.target.value)}
               placeholder="Paste your social media URL"
-              className="flex-grow p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className={`flex-grow p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 ${
+                link.show ? 'focus:ring-blue-400' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              }`}
             />
- 
+
             <label className="flex items-center cursor-pointer ml-2">
               <input
                 type="checkbox"
-                checked={!!link.show}  // force boolean
+                checked={!!link.show}
                 onChange={() => toggleShow(index)}
                 className="hidden"
               />
@@ -287,12 +239,13 @@ const SocialMediaIcons: React.FC<SocialMediaIconsProps> = ({ showCard, setShowCa
           </div>
         );
       })}
+
       <div className="flex flex-col gap-3 mt-6">
         <button
           onClick={addLink}
           className="w-full text-blue-500 py-2 rounded-lg transition"
         >
-            +  ADD SOCIAL MEDIA LINK
+          +  ADD SOCIAL MEDIA LINK
         </button>
 
         <button

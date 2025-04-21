@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
 interface Props {
@@ -9,7 +9,11 @@ interface Props {
 }
 
 const DescriptionCard: React.FC<Props> = ({ description, onClose, onSubmit }) => {
-  const [inputValue, setInputValue] = React.useState(description);
+  const [inputValue, setInputValue] = useState(description);
+
+  useEffect(() => {
+    setInputValue(description);
+  }, [description]);
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-2xl w-[90%] max-w-[800px] h-[80vh] max-h-[400px] relative flex flex-col justify-between">

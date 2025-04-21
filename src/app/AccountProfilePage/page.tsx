@@ -22,7 +22,7 @@ import {
 } from 'react-icons/si';
 
 const IconMap = {
-  // From react-icons/fa
+
   GitHub: FaGithub,
   GitLab: FaGitlab,
   Bitbucket: FaBitbucket,
@@ -44,7 +44,6 @@ const IconMap = {
   Pinterest: FaPinterest,
   TikTok: FaTiktok,
 
-  // From react-icons/si
   HackerRank: SiHackerrank,
   LeetCode: SiLeetcode,
   Codeforces: SiCodeforces,
@@ -56,7 +55,6 @@ const IconMap = {
   CodeChef: SiCodechef,
   Threads: SiThreads,
 
-  // From lucide-react
   Briefcase,
   List,
   LineChart,
@@ -76,9 +74,23 @@ export default function ProfilePage() {
   const [socialLinks, setSocialLinks] = useState<{ platform: string; url: string; show: boolean }[]>([]);
   const [isSocialMediaModalOpen, setIsSocialMediaModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
-
   const [showAddSkills, setShowAddSkills] = useState(false);
+  const [savedSkills, setSavedSkills] = useState<{ skill: string; source: string }[]>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("accountPageSkills");
+      return stored ? JSON.parse(stored) : [];
+    }
+    return [];
+  });
 
+
+  const [profileData, setProfileData] = useState({
+    name: 'Murala Omkar',
+    description: 'Passionate web developer eager to level up and build applications that address current market issues and challenges.',
+    company: 'Wooble.io',
+    location: 'Bhubaneshwar, Odisha, India',
+    about: 'Be real—share your journey, your passions, and the moments that define you. Your unique story sparks genuine connections!',
+  });
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024); // Mobile size threshold
@@ -106,10 +118,60 @@ export default function ProfilePage() {
       setSocialLinks(linksWithShow);
     }
   }, []);
+
+////////////////////////////////////
+  const handleSaveSkills = (skills: { skill: string; source: string }[]) => {
+    setSavedSkills(skills);
+    localStorage.setItem("accountPageSkills", JSON.stringify(skills));
+    setShowAddSkills(false);
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("accountPageSkills", JSON.stringify(savedSkills));
+    }
+  }, [savedSkills]);
+
+  useEffect(() => {
+    const storedSkills = localStorage.getItem("accountPageSkills");
+    if (storedSkills) {
+      setSavedSkills(JSON.parse(storedSkills));
+    }
+  }, []);
+
+  //////////////////////////
   
 
-  // Save social media links to localStorage
-
+  const handleSaveUrl = (url: string | File | null) => {
+    if (url === null) {
+      setImageUrl(null);
+      localStorage.removeItem('profileCoverImage');
+    } else if (typeof url === 'string') {
+      setImageUrl(url);
+      localStorage.setItem('profileCoverImage', url);
+    } else {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const scale = Math.min(800 / img.width, 800 / img.height, 1); 
+          canvas.width = img.width * scale;
+          canvas.height = img.height * scale;
+  
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7); 
+            setImageUrl(compressedBase64);
+            localStorage.setItem('profileCoverImage', compressedBase64);
+          }
+        };
+        img.src = reader.result as string;
+      };
+      reader.readAsDataURL(url);
+    }
+  };
 
   const handleSaveSocialLinks = (updatedLinks: Record<string, string>) => {
     // Map only the links you want to display
@@ -148,16 +210,6 @@ export default function ProfilePage() {
     localStorage.setItem('socialLinks', JSON.stringify(updatedLinks));
   };
   
-
-
-  const [profileData, setProfileData] = useState({
-    name: 'Murala Omkar',
-    description: 'Passionate web developer eager to level up and build applications that address current market issues and challenges.',
-    company: 'Wooble.io',
-    location: 'Bhubaneshwar, Odisha, India',
-    about: 'Be real—share your journey, your passions, and the moments that define you. Your unique story sparks genuine connections!',
-  });
-
   useEffect(() => {
     const savedDescription = localStorage.getItem('userDescription');
     if (savedDescription) {
@@ -178,43 +230,14 @@ export default function ProfilePage() {
     { name: 'Impact Zone', icon: <LineChart className="w-5 h-5 mr-2" /> },
   ];
 
-  const handleSaveUrl = (url: string | File | null) => {
-    if (url === null) {
-      setImageUrl(null);
-      localStorage.removeItem('profileCoverImage');
-    } else if (typeof url === 'string') {
-      setImageUrl(url);
-      localStorage.setItem('profileCoverImage', url);
-    } else {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const scale = Math.min(800 / img.width, 800 / img.height, 1); 
-          canvas.width = img.width * scale;
-          canvas.height = img.height * scale;
-  
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7); 
-            setImageUrl(compressedBase64);
-            localStorage.setItem('profileCoverImage', compressedBase64);
-          }
-        };
-        img.src = reader.result as string;
-      };
-      reader.readAsDataURL(url);
-    }
-  };
+
   
 
   if (isMobile === null) return null; 
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Navbar />
+      {/* <Navbar /> */}
       <div className="max-w-6xl mx-auto mt-4 space-y-6 px-4 sm:px-6 md:px-8">
         {/* Profile Header Card */}
         <div className="bg-white rounded-2xl shadow-md overflow-hidden">
@@ -240,18 +263,11 @@ export default function ProfilePage() {
             {/* plus - 1 */}
             <div className="absolute right-3 mt-5 top-0 flex items-center space-x-2">
               {socialLinks
-                .filter(link => link.show) 
+                .filter(link => link.show)
                 .map((link, index) => {
                   const IconComponent = IconMap[link.platform as keyof typeof IconMap];
                   return (
-                    <a
-                      key={index}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800"
-                      title={link.platform}
-                    >
+                    <a key={index} href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800" title={link.platform}>
                       {IconComponent && <IconComponent className="w-5 h-5" />}
                     </a>
                   );
@@ -265,16 +281,19 @@ export default function ProfilePage() {
             </div>
 
             {isSocialMediaModalOpen && (
-              <div className="fixed inset-0 flex justify-center items-center z-50">
-                <div className="bg-white rounded-lg shadow-md max-w-md w-full">
+              <div className="fixed inset-0 flex justify-center items-center z-50 bg-black/40 bg-opacity-50">
+                <div className="bg-white rounded-lg shadow-md max-w-md w-full p-4">
                   <SocialMediaIcons
                     showCard={isSocialMediaModalOpen}
                     setShowCard={setIsSocialMediaModalOpen}
                     onSave={handleSaveSocialLinks}
+                    onToggleShow={handleToggleShow}
+                    existingLinks={socialLinks}
                   />
                 </div>
               </div>
             )}
+
   
             <div className="pt-16">
               <h1 className="text-3xl sm:text-4xl font-semibold text-gray-900 flex items-center gap-2">
@@ -310,18 +329,44 @@ export default function ProfilePage() {
             </div>
   
             {/* plus -2 */}
-            <div className="flex justify-end mt-4 text-sm text-gray-700 items-center gap-2">
-              <span className="font-semibold">Skills</span>
-              <span className="text-gray-400">No skills available</span>
+            <div className='flex justify-end'>
+            <div className="flex justify-between items-start mt-4 text-sm text-gray-700">
+              <div className="flex items-center mr-2 gap-2 flex-shrink-0">
+                <span className="font-semibold ml-6">Skills</span>
+              </div>
+
+              <div className="flex-1 min-w-0 mx-4">
+                {savedSkills.length === 0 ? (
+                  <span className="text-gray-400">No skills available</span>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {savedSkills.map((item, index) => (
+                      <span
+                        key={index}
+                        className="bg-blue-50 border border-blue-200 rounded-full px-3 py-1 text-sm whitespace-nowrap"
+                      >
+                        {item.skill}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <button
-                className="text-blue-500 hover:text-blue-700 transition font-bold"
+                className="text-blue-500 hover:text-blue-700 transition font-bold flex-shrink-0"
                 onClick={() => setShowAddSkills(true)}
               >
                 <Plus className="w-4.5 h-4.5 stroke-[6]" />
               </button>
             </div>
+            </div>
 
-
+            {showAddSkills && (
+              <AddSkills
+                handleClose={() => setShowAddSkills(false)}
+                onSaveSkills={handleSaveSkills}
+              />
+            )}
           </div>
         </div>
   
@@ -377,70 +422,47 @@ export default function ProfilePage() {
           <FooterLinks />
         </div>
   
-        {/* Modals */}
-        {isModalOpen && (
-          <UrlInputModal
-            isOpen={isModalOpen}
-            onClose={() => setIsModalOpen(false)}
-            onSave={handleSaveUrl}
-          />
-        )}
-  
-        {isProfileEditOpen && (
+          {/* Modals */}
+          {isModalOpen && (
+            <UrlInputModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              onSave={handleSaveUrl}
+            />
+          )}
+          {isProfileEditOpen && (
           <Edityourprofile
-            onClose={() => setIsProfileEditOpen(false)}
             currentValues={profileData}
+            onClose={() => setIsProfileEditOpen(false)}
             onSave={(updatedData) => {
-              setProfileData({
-                ...updatedData,
-                about: updatedData.description || '',
-              });
+              setProfileData(prev => ({
+                ...prev,
+                name: updatedData.name,
+                company: updatedData.company,
+                description: updatedData.description,
+                location: updatedData.location
+              }));
               setIsProfileEditOpen(false);
             }}
           />
         )}
-
         {/* Conditional rendering of AddSkills */}
-        {showAddSkills && (
-          <div className="fixed inset-0 b z-50 flex items-center justify-center">
-            <div className="relative">
-              <AddSkills handleClose={() => setShowAddSkills(false)} />
-            </div>
-          </div>
-        )}  
-
         {isDescriptionEditOpen && (
           <div className="fixed inset-0 bg-black/40 bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-md p-6 max-w-md w-full">
-              <div className="text-lg mb-4">Edit your description</div>
-              <textarea
-                className="w-full p-3 border border-gray-300 rounded-lg"
-                value={descriptionInput}
-                onChange={(e) => setDescriptionInput(e.target.value)}
-                rows={5}
-              />
-              <div className="flex justify-between items-center mt-4">
-                <button
-                  className="px-4 py-2 bg-gray-500 text-white rounded-md"
-                  onClick={() => setIsDescriptionEditOpen(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="px-4 py-2 bg-blue-500 text-white rounded-md"
-                  onClick={() => {
-                    handleDescriptionSubmit(descriptionInput);
-                    setIsDescriptionEditOpen(false);
-                  }}
-                >
-                  Save
-                </button>
-              </div>
-            </div>
+            <DescriptionCard
+              description={profileData.about}
+              onClose={() => setIsDescriptionEditOpen(false)}
+              onSubmit={(newDescription) => {
+                setProfileData(prev => ({
+                  ...prev,
+                  about: newDescription // <-- only updates the "This is me" text
+                }));
+                setIsDescriptionEditOpen(false);
+              }}
+            />
           </div>
         )}
       </div>
     </div>
-  );
-  
+  ); 
 }

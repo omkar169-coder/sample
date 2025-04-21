@@ -1,19 +1,43 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 interface AddSkillsProps {
     handleClose: () => void;
-    
+    onSaveSkills: (skills: { skill: string; source: string }[]) => void;
   }
   
-  const AddSkills: React.FC<AddSkillsProps> = ({ handleClose }) => {
+  const AddSkills: React.FC<AddSkillsProps> = ({ handleClose, onSaveSkills }) => {
     const [skill, setSkill] = useState("");
     const [source, setSource] = useState("");
     const [customSource, setCustomSource] = useState("");
-    const [skillsList, setSkillsList] = useState<{ skill: string; source: string }[]>([]);
-  const yourSkills = [
-    "JavaScript", "HTML", "CSS", "Python", "Java", "C++", "C#", "SQL", "Git",
+    const [skillsList, setSkillsList] = useState<{ skill: string; source: string }[]>(() => {
+      if (typeof window !== "undefined") {
+        const storedSkills = localStorage.getItem("persistedSkills");
+        return storedSkills ? JSON.parse(storedSkills) : [];
+      }
+      return [];
+    });
+    
+
+      // Added savedSkills state
+      const [savedSkills, setSavedSkills] = useState<{ skill: string; source: string }[]>(() => {
+        if (typeof window !== "undefined") {
+          const stored = localStorage.getItem("accountPageSkills");
+          return stored ? JSON.parse(stored) : [];
+        }
+        return [];
+      });
+
+  const handleSaveSkills = (skills: { skill: string; source: string }[]) => {
+    setSavedSkills(skills);
+    localStorage.setItem("accountPageSkills", JSON.stringify(skills));
+    //setShowAddSkills(false); // Assuming `setShowAddSkills` is used to toggle visibility
+    handleClose(); // Close the modal after saving
+  };
+
+    const yourSkills = [
+    "JavaScript", "HTML", "CSS", "Python", "Java", "C++", "c", "C#", "SQL", "Git",
     "React", "Node.js", "Android Development", "iOS Development", "PHP",
     "Laravel", "AWS", "Azure", "Google Cloud", "Machine Learning",
     "Data Analysis", "Excel", "R", "Tableau", "Power BI", "AutoCAD", "MATLAB",
@@ -88,15 +112,11 @@ interface AddSkillsProps {
       )
     : [];
 
-  const handleAddSkill = () => {
-    const finalSource = source === "Other" ? customSource.trim() : source;
-    if (skill.trim() && finalSource) {
-      setSkillsList((prev) => [...prev, { skill: skill.trim(), source: finalSource }]);
-      setSkill("");
-      setSource("");
-      setCustomSource("");
-    }
-  };
+    const handleAddSkill = () => {
+      console.log("Saved Skills:", skillsList);
+      onSaveSkills(skillsList);
+    };
+    
 
   const handleSuggestionClick = (suggestedSkill: string) => {
     setSkill(suggestedSkill);
@@ -106,19 +126,48 @@ interface AddSkillsProps {
     setSkillsList((prev) => prev.filter((_, i) => i !== index));
   };
 
+    // Automatically add skill to list when source is selected
+    useEffect(() => {
+      const finalSource = source === "Other" ? customSource.trim() : source;
+  
+      if (
+        skill.trim() &&
+        finalSource &&
+        !skillsList.some(
+          (item) =>
+            item.skill.toLowerCase() === skill.trim().toLowerCase() &&
+            item.source.toLowerCase() === finalSource.toLowerCase()
+        )
+      ) {
+        setSkillsList((prev) => [...prev, { skill: skill.trim(), source: finalSource }]);
+        setSkill("");
+        setSource("");
+        setCustomSource("");
+      }
+    }, [source, customSource]);
+  
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("persistedSkills", JSON.stringify(skillsList));
+    }
+  }, [skillsList]);
+  
+
   return (
-    <div className="max-w-4xl mx-auto p-8 bg-white rounded-3xl shadow-2xl">
-        <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Add Your Skills</h2>
-            <button
-            onClick={handleClose}
-            className="text-3xl leading-none ml-38 text-gray-400 hover:text-gray-600"
-            >
-            ×
-            </button>
-        </div>
-
-
+    <div className="w-full sm:max-w-2xl sm:mx-auto p-6 sm:p-8 bg-white rounded-3xl  shadow-2xl overflow-hidden sm:translate-x-0 translate-x-0 sm:rounded-3xl sm:shadow-2xl">
+      <div className="flex flex-row  items-center justify-between mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+          Add Your Skills
+        </h2>
+        <button
+          onClick={handleClose}
+          className="text-3xl leading-none text-gray-400 hover:text-gray-600"
+        >
+          ×
+        </button>
+      </div>
+        
       <div className="mb-5 relative">
         <label className="block text-sm font-semibold text-gray-700 mb-2">
           Search and Add Skills
@@ -144,9 +193,9 @@ interface AddSkillsProps {
           </ul>
         )}
       </div>
-
-      <div className="mb-5">
-        <label className="block text-sm font-semibold mt-15 text-gray-700 mb-2">
+  
+      <div className="mt-15">
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
           Where did you learn this skill?
         </label>
         <select
@@ -161,7 +210,7 @@ interface AddSkillsProps {
           <option value="Training Program">Training Program</option>
           <option value="Other">Other</option>
         </select>
-
+  
         {source === "Other" && (
           <input
             type="text"
@@ -172,10 +221,12 @@ interface AddSkillsProps {
           />
         )}
       </div>
-
+  
       {skillsList.length > 0 && (
-        <div className="mb-5">
-          <h3 className="text-sm font-semibold text-gray-700 mb-2">Added Skills</h3>
+        <div className="mt-5">
+          <h3 className="text-sm font-semibold text-gray-700 mb-2">
+            Added Skills
+          </h3>
           <ul className="flex flex-wrap gap-2">
             {skillsList.map((item, index) => (
               <li
@@ -194,16 +245,16 @@ interface AddSkillsProps {
           </ul>
         </div>
       )}
-
+  
       <button
         onClick={handleAddSkill}
-        disabled={!skill.trim() || !source || (source === "Other" && !customSource.trim())}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-semibold transition"
+        disabled={skillsList.length === 0}
+        className="w-full mt-5 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-semibold transition"
       >
-        Add Skill
+        Save Skills
       </button>
     </div>
-  );
+  );  
 };
 
 export default AddSkills;

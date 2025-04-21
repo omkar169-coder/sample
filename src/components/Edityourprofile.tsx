@@ -7,13 +7,13 @@ interface Props {
   currentValues: {
     name: string;
     company: string;
-    description: string;  
+    description: string;
     location: string;
   };
   onSave: (data: {
     name: string;
     company: string;
-    description: string;  
+    description: string;
     location: string;
   }) => void;
 }
@@ -21,18 +21,16 @@ interface Props {
 const Edityourprofile: React.FC<Props> = ({ onClose, currentValues, onSave }) => {
   const [name, setName] = useState(currentValues.name);
   const [company, setCompany] = useState(currentValues.company);
-  const [description, setDescription] = useState(currentValues.description);  
+  const [description, setDescription] = useState(currentValues.description);
   const [location, setLocation] = useState(currentValues.location);
 
-  
   useEffect(() => {
     setName(currentValues.name);
     setCompany(currentValues.company);
-    setDescription(currentValues.description);  
+    setDescription(currentValues.description);
     setLocation(currentValues.location);
   }, [currentValues]);
 
-  
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {
@@ -44,7 +42,7 @@ const Edityourprofile: React.FC<Props> = ({ onClose, currentValues, onSave }) =>
     onSave({
       name,
       company,
-      description,  
+      description,
       location,
     });
   };
@@ -89,10 +87,10 @@ const Edityourprofile: React.FC<Props> = ({ onClose, currentValues, onSave }) =>
               About
             </label>
             <textarea
-              id="description"  
+              id="description"
               rows={4}
-              value={description}  
-              onChange={(e) => setDescription(e.target.value)} 
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               className="w-full mt-2 p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
               placeholder="Tell Something About Yourself"
             />

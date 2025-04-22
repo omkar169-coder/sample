@@ -1,45 +1,60 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, PlusCircle, UserCircle } from "lucide-react";
+import { Bell, UserCircle } from "lucide-react";
 import Image from "next/image";
 import UserDropdown from "@/components/userdropdown";
+import SearchBar from "@/components/SearchBar"; 
+import { useSession, signIn, signOut } from "next-auth/react";
 
 const Navbar: React.FC = () => {
+  const { data: session } = useSession();
+
   return (
-    <nav className="bg-white shadow-md">
-      <div className="max-w-full mx-auto flex justify-evenly gap-140 items-center w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 2xl:px-20 py-3">
-        
+    <nav className="bg-white shadow-md h-20">
+      <div className="max-w-[1200px] mx-auto flex items-center justify-between px-4 sm:px-6 md:px-8 py-3 w-full">
+
         <Link href="/">
           <Image 
             src="/wooble_logo_mini.png" 
             alt="Company Logo" 
             width={60} 
             height={30} 
-            className="cursor-pointer"
+            className="cursor-pointer mb-5"
           />
         </Link>
 
+        {/* Search Bar */}
+        <div className="hidden lg:flex justify-center flex-grow mx-8 mt-2">
+          <SearchBar />
+        </div>
+
         <div className="flex items-center gap-4">
-          
-          {/* <button className="flex items-center text-gray-700 border border-gray-300 rounded-lg px-3 py-2 text-sm transition hover:bg-gray-100">
-            <PlusCircle className="w-5 h-5 mr-2" />
-            Add Post
-          </button> */}
+          {session ? (
+            <>
+              {/* Bell Icon */}
+              <div className="relative">
+                <Bell className="w-6 h-6 mb-5 text-gray-600 hover:text-blue-600 cursor-pointer" />
+                    {/* <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
+                      3
+                    </span> */}
+              </div>
 
-          <div className="relative">
-            <Bell className="w-6 h-6 text-gray-600 hover:text-blue-600 cursor-pointer" />
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">
-              3
-            </span>
-          </div>
-
-          {/* ✅ Wrap UserCircle in UserDropdown */}
-          <UserDropdown
-            trigger={
-              <UserCircle className="w-8 h-8 text-gray-600 hover:text-blue-600 cursor-pointer" />
-            }
-          />
+              {/* User Dropdown with User Circle */}
+              <UserDropdown
+                trigger={
+                  <UserCircle className="w-8 h-12 mb-5 text-gray-600 hover:text-blue-600 cursor-pointer" />
+                }
+              />
+            </>
+          ) : (
+            <button
+              className="border border-blue-400 mb-6 text-black px-4 py-2 rounded-full hover:bg-blue-50 transition-all"
+              onClick={() => signIn("google")}
+            >
+              Login / Signup
+            </button>
+          )}
         </div>
       </div>
     </nav>

@@ -7,8 +7,8 @@ import FooterLinks from '@/components/footerlinks';
 import MobileResponsiveNavbar from '@/components/mobileresponsivenavbar';
 import ProjectsTab from '@/components/projectstab';
 import AddSkills from '@/components/addskills';
-import TimelineTab from '@/components/timelinetab';
-import ImpactZoneTab from '@/components/impactzonestab';
+// import TimelineTab from '@/components/timelinetab';
+// import ImpactZoneTab from '@/components/impactzonestab';
 import UrlInputModal from '@/components/urlinputmodal';
 import Edityourprofile from '@/components/Edityourprofile';
 import DescriptionCard from '@/components/DescriptionCard';
@@ -409,15 +409,17 @@ export default function ProfilePage() {
               </button>
             ))}
           </div>
+
+          {/* ////////////////////////////////// */}
   
           {/* Tab Content */}
           <div className="mt-8 text-lg text-gray-700 w-full">
             {activeTab === 'Projects' && <ProjectsTab />}
-            {activeTab === 'Timeline' && <TimelineTab />}
-            {activeTab === 'Impact Zone' && <ImpactZoneTab />}
+            {/* {activeTab === 'Timeline' && <TimelineTab />} */}
+            {/* {activeTab === 'Impact Zone' && <ImpactZoneTab />} */}
           </div>
         </div>
-  
+                {/* /////////////////////////////////// */}
         <div className="mt-40">
           <FooterLinks />
         </div>

@@ -8,13 +8,17 @@ import ImportantLinks from "@/components/ImportantLinks";
 import ChannelsCard from "@/components/ChannelsCard";
 import ProfileSuggestions from "@/components/ProfileSuggestions";
 import UpgradeCard from "@/components/UpgradeCard";
-import SearchBar from "@/components/SearchBar";
+// import SearchBar from "@/components/SearchBar";
 import PostSection from "@/components/PostSection";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const [isMobile, setIsMobile] = useState<boolean | null>(null);
   const [userId, setUserId] = useState<number | null>(null);
   
+  // Example user data (for now, you can update this from an actual API call)
+  const userEmailID = "user@example.com";  // Replace with actual user email ID
+  const userName = "Murala Omkar";             // Replace with actual user name
+
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
     handleResize();
@@ -31,19 +35,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <div className="flex flex-col lg:flex-row mt-4 px-4 sm:px-6 lg:px-8 gap-3 overflow-hidden overflow-x-hidden justify-center">
         
         <div className="hidden lg:flex flex-col w-full max-w-[220px] space-y-3 overflow-hidden overflow-x-hidden">
-          <Profilecard />
+          <Profilecard userEmailID={userEmailID} userName={userName} />
           <ImportantLinks />
           <ChannelsCard />
         </div>
 
         <div className="flex-grow px-2 max-w-[750px] sm:px-4 my-2 lg:my-0 overflow-hidden overflow-x-hidden">
           <div className="mb-2">
-              <SearchBar />
+              {/* <SearchBar /> */}
           </div>
           <PostSection userId={userId as number} />
         </div>
 
-   
         <div className="hidden lg:flex flex-col w-full max-w-[300px] space-y-3 overflow-hidden overflow-x-hidden">
           <ProfileSuggestions />
           <UpgradeCard />

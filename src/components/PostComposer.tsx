@@ -15,6 +15,8 @@ interface PostComposerProps {
   isAnonymous: boolean;
   setIsAnonymous: React.Dispatch<React.SetStateAction<boolean>>;
   onPost: () => void;
+  userName: string; // Add userName prop
+  userProfilePic?: string | null; // Add userProfilePic prop to handle the profile picture
 }
 
 const PostComposer: React.FC<PostComposerProps> = ({
@@ -25,6 +27,8 @@ const PostComposer: React.FC<PostComposerProps> = ({
   isAnonymous,
   setIsAnonymous,
   onPost,
+  userName,
+  userProfilePic, // Accept userProfilePic as a prop
 }) => {
   const [preview, setPreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -156,20 +160,27 @@ const PostComposer: React.FC<PostComposerProps> = ({
   };
 
   return (
-    <div>
+    <div className=" mt-10">
       {/* Post Entry Bar */}
       <div className="flex items-center bg-white gap-4 px-4 py-4 mb-4 rounded-lg shadow-md">
-        <Image
-          src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
-          alt="Profile"
-          width={50}
-          height={50}
-          className="rounded-full"
-        />
+        {userProfilePic ? (
+          <Image
+            src={userProfilePic}
+            alt="Profile"
+            width={50}
+            height={50}
+            className="rounded-full"
+          />
+        ) : (
+          <div className="w-12 h-12 flex items-center justify-center bg-gray-300 text-black rounded-full">
+           M {userName && userName.charAt(0).toUpperCase()} {/* Added condition to avoid error */}
+          </div>
+        )}
+
         
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex-1 text-left text-gray-500 bg-white rounded-lg px-4 py-2"
+          className="flex-1 text-left text-gray-500  bg-white rounded-lg px-4 py-2"
         >
           What's on your mind?
         </button>

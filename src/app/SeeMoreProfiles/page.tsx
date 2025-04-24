@@ -29,7 +29,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <div className="flex flex-col lg:flex-row mt-4 px-4 sm:px-6 lg:px-8 gap-3 overflow-hidden overflow-x-hidden justify-center">
         
         <div className="hidden lg:flex flex-col w-full max-w-[220px] space-y-3 overflow-hidden overflow-x-hidden">
-          <Profilecard />
+          {/* <Profilecard /> */}
+          <Profilecard userEmailID="demo@email.com" userName="Demo User" />
           <ImportantLinks />
           <ChannelsCard />
         </div>

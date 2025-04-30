@@ -9,6 +9,8 @@ import ShareButton from "@/components/ShareButton";
 import Image from "next/image";
 import FullCardView from "@/components/FullCardView";
 import ReplySection from "@/components/ReplySection";
+import Link from "next/link";
+// import AccountProfilePage from "./AccountProfilePage";
 
 interface Media {
   media_url: string;
@@ -126,44 +128,57 @@ const MergedPostCard: React.FC<MergedPostCardProps> = ({
     }
   };
 
+  const fetchUserDetails = async (username: string) => {
+    try {
+      const response = await axios.get(`https://wooble.io/user/${username}`, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+      return null;
+    }
+  };
+  
+  
+  
+  const handleUserClick = async () => {
+    const userData = await fetchUserDetails(post.username);
+    if (userData) {
+      console.log('Fetched User Data:', userData);
+      window.location.href = `/user/${post.username}`;
+    } else {
+      alert('Failed to fetch user data.');
+    }
+  };
+
   return (
     <div className="bg-white p-4 sm:p-5 mb-2 rounded-xl relative border border-gray-200">
       {/* Profile Section */}
       <div className="flex items-center gap-3 mb-3">
-        {/* <div className="relative w-10 h-10 rounded-full overflow-hidden">
-          <Image
-            src={
-              post.profile_pic
-                ? sanitizeMediaUrl(post.profile_pic)
-                : "/default-avatar.png"
-            }
-            alt="User Avatar"
-            layout="fill"
-            objectFit="cover"
-            className="rounded-full"
-          />
-        </div> */}
-        <div className="relative w-10 h-10 rounded-full overflow-hidden">
-        <Image
-          src={
-            post.profile_pic
-              ? sanitizeMediaUrl(post.profile_pic)
-              : "https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80"
-          }
-          alt="User Avatar"
-          layout="fill"
-          objectFit="cover"
-          className="rounded-full"
-        />
-      </div>
-        <div>
-          <p className="text-sm sm:text-base font-semibold">
-            {post.is_anonymous ? "Anonymous" : post.name}
-          </p>
-          <p className="text-xs text-gray-500">
-            {new Date(post.timestamp).toLocaleString()}
-          </p>
-        </div>
+      <div className="relative w-10 h-10 rounded-full overflow-hidden">
+  <div onClick={handleUserClick} className="cursor-pointer relative w-10 h-10">
+    <Image
+      src={
+        post.profile_pic
+          ? sanitizeMediaUrl(post.profile_pic)
+          : 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&q=80'
+      }
+      alt={post.name}
+      layout="fill"
+      objectFit="cover"
+      className="rounded-full"
+    />
+  </div>
+</div>
+<div>
+  <div onClick={handleUserClick} className="cursor-pointer">
+    <p className="text-sm sm:text-base font-semibold">{post.is_anonymous ? 'Anonymous' : post.name}</p>
+  </div>
+  <p className="text-xs text-gray-500">{new Date(post.timestamp).toLocaleString()}</p>
+</div>
         <button
           onClick={() =>
             setShowMenu(showMenu === post.question_id ? null : post.question_id)

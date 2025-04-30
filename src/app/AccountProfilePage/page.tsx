@@ -1,14 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Navbar from '@/components/navbar';
 import { Briefcase, List, LineChart, Plus, MapPin, Pencil } from 'lucide-react';
 import FooterLinks from '@/components/footerlinks';
-import MobileResponsiveNavbar from '@/components/mobileresponsivenavbar';
 import ProjectsTab from '@/components/projectstab';
 import AddSkills from '@/components/addskills';
 import TimelineTab from '@/components/timelinetab';
-// import ImpactZoneTab from '@/components/impactzonestab';
+import ImpactZoneTab from '@/components/impactzonestab';
 import UrlInputModal from '@/components/urlinputmodal';
 import Edityourprofile from '@/components/Edityourprofile';
 import DescriptionCard from '@/components/DescriptionCard';
@@ -20,6 +18,7 @@ import {
   SiHackerrank, SiLeetcode, SiCodeforces, SiReplit, SiHashnode, SiKaggle,
   SiProducthunt, SiIndiehackers, SiCodechef, SiThreads
 } from 'react-icons/si';
+
 
 const IconMap = {
 
@@ -66,6 +65,7 @@ const IconMap = {
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('Projects');
+  const [isClient, setIsClient] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
@@ -92,8 +92,13 @@ export default function ProfilePage() {
     about: 'Be real—share your journey, your passions, and the moments that define you. Your unique story sparks genuine connections!',
   });
 
+
+useEffect(() => {
+  setIsClient(true);
+}, []);
+
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 1024); // Mobile size threshold
+    const handleResize = () => setIsMobile(window.innerWidth < 1024); 
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -110,10 +115,9 @@ export default function ProfilePage() {
     const savedLinks = localStorage.getItem('socialLinks');
     if (savedLinks) {
       const parsedLinks = JSON.parse(savedLinks);
-      // Ensure every link has the 'show' property
       const linksWithShow = parsedLinks.map((link: { platform: string; url: string; show: boolean }) => ({
         ...link,
-        show: true,  // Add 'show' property here
+        show: true, 
       }));
       setSocialLinks(linksWithShow);
     }
@@ -174,11 +178,11 @@ export default function ProfilePage() {
   };
 
   const handleSaveSocialLinks = (updatedLinks: Record<string, string>) => {
-    // Map only the links you want to display
+
     const formattedLinks = Object.entries(updatedLinks).map(([platform, url]) => ({
       platform,
       url,
-      show: false,  // Always true because the onSave only passes shown links
+      show: false, 
     }));
   
 
@@ -230,10 +234,6 @@ export default function ProfilePage() {
     { name: 'Impact Zone', icon: <LineChart className="w-5 h-5 mr-2" /> },
   ];
 
-
-  
-
-  if (isMobile === null) return null; 
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -294,7 +294,6 @@ export default function ProfilePage() {
               </div>
             )}
 
-  
             <div className="pt-16">
               <h1 className="text-3xl sm:text-4xl font-semibold text-gray-900 flex items-center gap-2">
                 {profileData.name}
@@ -329,28 +328,31 @@ export default function ProfilePage() {
             </div>
   
             {/* plus -2 */}
-            <div className='flex justify-end'>
-            <div className="flex justify-between items-start mt-4 text-sm text-gray-700">
-              <div className="flex items-center mr-2 gap-2 flex-shrink-0">
-                <span className="font-semibold ml-6">Skills</span>
-              </div>
+            <div className="flex justify-end">
+              <div className="flex justify-between items-start mt-4 text-sm text-gray-700">
+                <div className="flex items-center mr-2 gap-2 flex-shrink-0">
+                  <span className="font-semibold ml-6">Skills</span>
+                </div>
 
-              <div className="flex-1 min-w-0 mx-4">
-                {savedSkills.length === 0 ? (
-                  <span className="text-gray-400">No skills available</span>
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {savedSkills.map((item, index) => (
-                      <span
-                        key={index}
-                        className="bg-blue-50 border border-blue-200 rounded-full px-3 py-1 text-sm whitespace-nowrap"
-                      >
-                        {item.skill}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
+                <div className="flex-1 min-w-0 mx-4">
+                  {!isClient ? (
+                    <span className="text-gray-400">Loading skills...</span>
+                  ) : savedSkills.length === 0 ? (
+                    <span className="text-gray-400">No skills available</span>
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      {savedSkills.map((item, index) => (
+                        <span
+                          key={index}
+                          className="bg-blue-50 border border-blue-200 rounded-full px-3 py-1 text-sm whitespace-nowrap"
+                        >
+                          {item.skill}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
 
               <button
                 className="text-blue-500 hover:text-blue-700 transition font-bold flex-shrink-0"
@@ -416,7 +418,7 @@ export default function ProfilePage() {
           <div className="mt-8 text-lg text-gray-700 w-full">
             {activeTab === 'Projects' && <ProjectsTab />}
             {activeTab === 'Timeline' && <TimelineTab />}
-            {/* {activeTab === 'Impact Zone' && <ImpactZoneTab />} */}
+            {activeTab === 'Impact Zone' && <ImpactZoneTab />}
           </div>
         </div>
                 {/* /////////////////////////////////// */}

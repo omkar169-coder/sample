@@ -14,6 +14,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'wooble.org',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
     ],
   },
 };

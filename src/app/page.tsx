@@ -16,8 +16,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const [userId, setUserId] = useState<number | null>(null);
   
   // Example user data (for now, you can update this from an actual API call)
-  const userEmailID = "user@example.com";  // Replace with actual user email ID
-  const userName = "Murala Omkar";             // Replace with actual user name
+  const userEmailID = "user@example.com"; 
+  const userName = "Murala Omkar";             
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);

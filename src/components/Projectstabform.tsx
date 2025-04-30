@@ -4,73 +4,72 @@ import {
   Link as LinkIcon, BarChart2, UsersRound, AlignLeft, ListTree, BadgeCheck,
   Users, FileUp, Info, Eye, Lightbulb, Calendar, Image as ImageIcon, ArrowLeft
 } from "lucide-react";
-
+import React from "react";
 import { useState, useEffect } from "react";
 
+interface Project {
+  id: number;
+  user_id: number;
+  title: string;
+  duration: string;
+  technologies: string;
+  visibility: string;
+  description: string;
+  project_description: string;
+  imageUrl: string;
+  project_type: string;
+  associated_with: string;
+  proof_of_work: string;
+  claps: number;
+  collaborationType: string;
+}
 
-
-type Project = { id: number; user_id: number; project_title: string; 
-  project_duration: string; technologies_used: string; visibility: string; 
-  project_description: string; project_type: string; associated_with: string; 
-  proof_of_work: string; github_demo_link: string; project_impact: string; 
-  collaboration_type: string; claps: number; banner_image: string; 
-  project_visibility: string; skills_used: string[]; project_link: string;
+type ProjectFormData = { 
+  id: number; 
+  user_id: number; 
+  project_title: string; 
+  project_duration: string; 
+  technologies_used: string; 
+  visibility: string; 
+  project_description: string; 
+  project_type: string; 
+  associated_with: string; 
+  proof_of_work: string; 
+  github_demo_link: string; 
+  project_impact: string; 
+  collaboration_type: string; 
+  claps: number; 
+  banner_image: string; 
+  project_visibility: string; 
+  skills_used: string[]; 
+  project_link: string;
 };
 
 type ProjectstabformProps = {
-  onSubmit: (data: Project) => void;
+  onSubmit: (data: ProjectFormData) => void;
   projectId: number;
   onBack: () => void;
-  defaultValues?: Project;
+  defaultValues?: ProjectFormData;
 };
 
-
 const Projectstabform: React.FC<ProjectstabformProps> = ({ onSubmit, onBack, defaultValues }) => {
-  const [project, setProject] = useState<Project | null>(defaultValues || null);
+  const [project, setProject] = useState<ProjectFormData | null>(defaultValues || null);
   const [error, setError] = useState<string | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
-
   const handleBackClick = () => {
     onBack();
   };
 
   useEffect(() => {
-    const fetchProject = async () => {
-      if (!defaultValues?.id) return; // Early return if no ID
-
-      try {
-        const formData = new URLSearchParams();
-        formData.append("project_id", defaultValues.id.toString());
-
-        const res = await fetch("https://wooble.io/api/project/get_project.php", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: formData.toString(),
-        });
-
-        const data = await res.json();
-
-        if (data.success && data.project) {
-          setProject(data.project);
-        } else {
-          setError(data.message || "Failed to load project");
-        }
-      } catch (err) {
-        setError("Something went wrong while fetching project details.");
-      }
-    };
-
-    fetchProject();
+    if (defaultValues) {
+      setProject(defaultValues);
+    }
   }, [defaultValues?.id]);
-
-
-
+  
   const handleChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
@@ -81,7 +80,6 @@ const Projectstabform: React.FC<ProjectstabformProps> = ({ onSubmit, onBack, def
     }));
   };
 
-
   const handleChangeTextArea = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = event.target;
     setProject((prev) => ({
@@ -89,8 +87,7 @@ const Projectstabform: React.FC<ProjectstabformProps> = ({ onSubmit, onBack, def
       [name]: value,
     }));
   };
-  
-  
+    
   const handleTitleClick = () => {
     setIsEditingTitle(true);
   };
@@ -102,8 +99,6 @@ const Projectstabform: React.FC<ProjectstabformProps> = ({ onSubmit, onBack, def
     }
   };
 
-
-  
   const handleChangeSelect = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = event.target;
     setProject((prev) => ({
@@ -112,7 +107,6 @@ const Projectstabform: React.FC<ProjectstabformProps> = ({ onSubmit, onBack, def
     }));
   };
   
-
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!project) return;
@@ -132,20 +126,19 @@ const Projectstabform: React.FC<ProjectstabformProps> = ({ onSubmit, onBack, def
       if (file) {
         formData.append("banner_image", file);
       }
+      // const res = await fetch("https://wooble.io/api/project/update_project.php", {
+      //   method: "POST",
+      //   body: formData,
+      // });
 
-      const res = await fetch("https://wooble.io/api/project/update_project.php", {
-        method: "POST",
-        body: formData,
-      });
+      // const data = await res.json();
 
-      const data = await res.json();
-
-      if (!data.success) {
-        setError(data.message || "Failed to update project.");
-      } else {
-        alert("Project updated successfully!");
-        setIsEditingTitle(false);
-      }
+      // if (!data.success) {
+      //   setError(data.message || "Failed to update project.");
+      // } else {
+      //   alert("Project updated successfully!");
+      //   setIsEditingTitle(false);
+      // }
     } catch (err) {
       setError("Failed to submit the form.");
     } finally {
@@ -157,12 +150,9 @@ const Projectstabform: React.FC<ProjectstabformProps> = ({ onSubmit, onBack, def
     return <div className="text-red-500">{error}</div>;
   }
 
-  if (!project) {
-    return <div>Loading project...</div>;
-  }
-
-
-  
+  // if (!project) {
+  //   return <div>Loading project...</div>;
+  // }
 
   return (
     <form onSubmit={handleSubmit}
@@ -296,11 +286,11 @@ const Projectstabform: React.FC<ProjectstabformProps> = ({ onSubmit, onBack, def
         name="project_description"
         placeholder="Provide a brief description of your project"
         value={project?.project_description || ""}
-        onChange={handleChange}
-        className="mt-2 w-full border border-gray-300 rounded-md px-3 py-2 resize-none focus:outline-none focus:ring focus:ring-blue-200"
+        onChange={handleChangeTextArea}
+        className="mt-2 w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200"
+        rows={5}
       />
-    </div>
-
+</div>
 
 <div>
   <label className="flex items-center font-medium text-gray-700">
@@ -329,7 +319,7 @@ const Projectstabform: React.FC<ProjectstabformProps> = ({ onSubmit, onBack, def
     type="text"
     name="skills_used"
     placeholder="Enter skills (comma-separated)"
-    value={project?.skills_used.join(", ") || ""}
+    value={Array.isArray(project?.skills_used) ? project.skills_used.join(", ") : ""}
     onChange={(e) => {
       const skillsArray = e.target.value.split(",").map((skill) => skill.trim());
       setProject((prev) => ({
@@ -340,7 +330,6 @@ const Projectstabform: React.FC<ProjectstabformProps> = ({ onSubmit, onBack, def
     className="mt-2 w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200"
   />
 </div>
-
 
 <div>
   <label className="flex items-center font-medium text-gray-700">
@@ -359,7 +348,6 @@ const Projectstabform: React.FC<ProjectstabformProps> = ({ onSubmit, onBack, def
     <option value="company">Company</option>
   </select>
 </div>
-
 
 <div>
   <label className="flex items-center font-medium text-gray-700">
@@ -390,7 +378,6 @@ const Projectstabform: React.FC<ProjectstabformProps> = ({ onSubmit, onBack, def
     className="mt-2 w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200"
   />
 </div>
-
 
 {/* Toggle Button */}
 <button
@@ -445,7 +432,7 @@ const Projectstabform: React.FC<ProjectstabformProps> = ({ onSubmit, onBack, def
       loading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
     }`}
   >
-    {loading ? "Updating..." : "Save Changes"}
+     {loading ? "Updating..." : "submit project"}
   </button>
 </div>
 </form>

@@ -258,3 +258,143 @@ interface AddSkillsProps {
 };
 
 export default AddSkills;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// {success: true,…}
+// impacts
+// : 
+// [{id: 113, title: "testing", description: "hi testing", impact_type: "hustle", date: "2025-04-06",…},…]
+// 0
+// : 
+// {id: 130, title: "testing", description: "random test ", impact_type: "hustle", date: "2025-04-30",…}
+// citations
+// : 
+// 0
+// created_at
+// : 
+// "2025-05-01 11:47:44"
+// date
+// : 
+// "2025-04-30"
+// description
+// : 
+// "random test "
+// duration
+// : 
+// null
+// hashed_entry_id
+// : 
+// "f9b0172235d0d96b516cec5530a05f6e4c8bf09a30538048b08f9d6d80d0bdb0"
+// id
+// : 
+// 130
+// image_url
+// : 
+// "impact-pic_68131207230df8.54530863.webp"
+// impact_factor
+// : 
+// "1.00"
+// impact_type
+// : 
+// "hustle"
+// location
+// : 
+// null
+// organization
+// : 
+// null
+// participants
+// : 
+// null
+// revenue
+// : 
+// "2.00"
+// title
+// : 
+// "testing"
+// tools_used
+// : 
+// ""
+// url
+// : 
+// null
+// users
+// : 
+// 3
+// success
+// : 
+// true

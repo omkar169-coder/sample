@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import ImpactZonesTab from "@/components/impactzonestab";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
@@ -20,15 +21,6 @@ const AddImpactForm = () => {
   const initialFormData = {
     email: "omkar@wooble.org",
     user_id: 9168,
-    name: "",
-    description: "",
-    users: "",
-    revenue: "",
-    impact: "",
-    eventDate: "",
-    awardBy: "",
-    researchTopic: "",
-    tools: [],
   };
 
   const [formData, setFormData] = useState<any>(initialFormData);
@@ -115,11 +107,16 @@ const AddImpactForm = () => {
         payload.append("revenue", formData.revenue);
         payload.append("impact", formData.impact);
         payload.append("startDate", startDate?.toISOString().split("T")[0] || "");
-        payload.append("tools", JSON.stringify(formData.tools));
+        payload.append("tools", Array.isArray(formData.tools) ? JSON.stringify(formData.tools) : formData.tools);
         break;
   
       case "event":
         endpoint = "https://wooble.io/api/impact/addEvent.php";
+        payload.append("name", formData.name);
+        payload.append("description", formData.description);
+        payload.append("location", formData.location);
+        payload.append("attendees", formData.attendees);
+        payload.append("organizer", formData.organizer);
         payload.append("eventDate", startDate?.toISOString().split("T")[0] || "");
         break;
   
@@ -151,15 +148,21 @@ const AddImpactForm = () => {
       });
   
       const result = await response.json();
+      console.log("API Response:", result);
   
-      if (result.status === "success") {
+      if (result.status) {
         setMessage({ type: "success", text: `${selectedOption.toUpperCase()} submitted successfully!` });
-  
-        // Optionally redirect or update state
-        router.push(`/impactzonestab?data=${encodeURIComponent(JSON.stringify(formData))}`);
-      } else {
-        setMessage({ type: "error", text: result.message || "Submission failed." });
+      
+        setTimeout(() => {
+          console.log("Redirecting to Account Profile Page");
+          router.push(`/AccountProfilePage??tab=${encodeURIComponent('Impact Zone')} data=${encodeURIComponent(JSON.stringify(formData))}`);
+
+          console.log("Redirecting to Account Profile Page");
+        }, 300); 
       }
+      else {
+        setMessage({ type: "error", text: result.message || "Submission failed." });
+      }      
     } catch (error) {
       console.error("Submission failed", error);
       setMessage({ type: "error", text: "Something went wrong while submitting." });
@@ -167,8 +170,7 @@ const AddImpactForm = () => {
       setLoading(false);
     }
   };
-  
-  
+
   // Reusable Field Components
   const textField = (label: string, placeholder: string, required = false, key = "") => (
     <>
@@ -232,12 +234,12 @@ const AddImpactForm = () => {
   );
 
   // utils or your form component
-const dateplace = (
-  label: string,
-  required: boolean,
-  value: Date | null,
-  onChange: (date: Date | null) => void
-) => (
+  const dateplace = (
+    label: string,
+    required: boolean,
+    value: Date | null,
+    onChange: (date: Date | null) => void
+  ) => (
   <div className="w-full mb-4">
     <label className="block mb-1 text-sm font-medium">
       {label} {required && <span className="text-red-500">*</span>}
@@ -271,79 +273,81 @@ const dateplace = (
   </div>
 );
 
-  const toolsField = (
-    <>
-      <label className="block mb-1 font-medium">Tools Used</label>
-      <input
-        type="text"
-        placeholder="Enter tools used"
-        className="w-full border-2 border-black-400 rounded-md p-2 mb-2"
-        value={toolInput}
-        onChange={(e) => setToolInput(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && toolInput.trim()) {
-            e.preventDefault();
-            const newTool = toolInput.trim();
-            if (!formData.tools.includes(newTool)) {
-              const updatedTools = [...formData.tools, newTool];
-              handleInputChange("tools", updatedTools);
-            }
-            setToolInput("");
-          }
-        }}
-      />
-  
-      <div className="flex flex-wrap gap-2 mt-2">
-        {formData.tools.map((tool: string, index: number) => (
-          <div
-            key={index}
-            className="flex items-center bg-green-500 text-white font-semibold px-3 py-1 rounded-full text-sm"
+// Ensure that formData.tools is always an array
+const tools = Array.isArray(formData.tools) ? formData.tools : [];
+
+// Tool field JSX
+const toolsField = (
+  <div className="mb-4">
+    <label className="block mb-1 font-medium">Tools Used</label>
+    <div className="flex gap-2 mb-2 flex-wrap">
+      {tools.map((tool: string, index: number) => (
+        <span
+          key={index}
+          className="bg-blue-100 text-blue-800 text-sm px-2 py-1 rounded flex items-center gap-1"
+        >
+          {tool}
+          <button
+            type="button"
+            onClick={() => {
+              const updatedTools = tools.filter((_: string, i: number) => i !== index);
+              setFormDataField("tools", updatedTools);
+            }}
+            className="text-red-500 hover:text-red-700 font-bold"
           >
-            {tool}
-            <button
-              type="button"
-              onClick={() => {
-                const updated = formData.tools.filter((_: unknown, i: number) => i !== index);
-                setFormDataField("tools", updated);
-              }}
-              className="ml-2 text-white hover:text-red-200 focus:outline-none"
-            >
-              ✕
-            </button>
-          </div>
-        ))}
-      </div>
-    </>
-  );
+            ×
+          </button>
+        </span>
+      ))}
+    </div>
+    <input
+      type="text"
+      placeholder="Add a tool and press Enter"
+      className="w-full border rounded-md p-2"
+      value={toolInput}
+      onChange={(e) => setToolInput(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" && toolInput.trim() !== "") {
+          e.preventDefault();
+          const updatedTools = [...tools, toolInput.trim()];  // Use 'tools' here instead of 'formData.tools'
+          setFormDataField("tools", updatedTools);
+          setToolInput("");
+        }
+      }}
+    />
+  </div>
+);
 
-  const renderForm = () => {
-    switch (selectedOption) {
-      case "hustle":
-        return (
-          <>
-            {textField("Name", "Enter hustle name", true, "name")}
-            {textField("Description", "Hustle description", false, "description")}
-            {numberField("Users", "Number of users", "users")}
-            {numberField("Revenue", "Revenue generated", "revenue")}
-            {numberField("Impact", "Impact factor", "impact")}
-            {dateField}
-            {toolsField}
-            {mediaField}
-          </>
-        );
+// Render form based on selected option
+const renderForm = () => {
+  switch (selectedOption) {
+    case "hustle":
+      return (
+        <>
+          {textField("Name", "Enter hustle name", true, "name")}
+          {textField("Description", "Hustle description", false, "description")}
+          {numberField("Users", "Number of users", "users")}
+          {numberField("Revenue", "Revenue generated", "revenue")}
+          {numberField("Impact", "Impact factor", "impact")}
+          {dateField}
+          {toolsField}
+          {mediaField}
+        </>
+      );
 
-      case "event":
-        return (
-          <>
-            {textField("Event Name", "Enter event name", true, "name")}
-            {textField("Description", "Event details", false, "description")}
-            {dateField}
-            {textField("Organizer", "Name of the organizer", true, "organizer")}
-            {textField("Location", "Event location", true, "location")}
-            {numberField("Number of Attendees", "Expected number of attendees", "attendees")}
-            {mediaField}
-          </>
-        );
+    case "event":
+      return (
+        <>
+          {textField("Event Name", "Enter event name", true, "name")}
+          {textField("Description", "Event details", false, "description")}
+          {dateField}
+          {textField("Organizer", "Name of the organizer", true, "organizer")}
+          {textField("Location", "Event location", true, "location")}
+          {numberField("Number of Attendees", "Expected number of attendees", "attendees")}
+          {mediaField}
+        </>
+      );
+
 
       case "award":
         return (
@@ -401,7 +405,7 @@ const dateplace = (
       </button>
 
       {message && (
-        <p className={`mt-4 text-sm font-medium ${message.type === "success" ? "text-green-600" : "text-red-600"}`}>
+        <p className={`mt-4 text-sm font-medium ${message.type === "success" ? "text-black-600" : "text-red-600"}`}>
           {message.text}
         </p>
       )}

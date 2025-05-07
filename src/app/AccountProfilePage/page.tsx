@@ -6,10 +6,15 @@ import FooterLinks from '@/components/footerlinks';
 import ProjectsTab from '@/components/projectstab';
 import AddSkills from '@/components/addskills';
 import TimelineTab from '@/components/timelinetab';
-import ImpactZoneTab from '@/components/impactzonestab';
+import ImpactZonesTab from '@/components/impactzonestab';
 import UrlInputModal from '@/components/urlinputmodal';
 import Edityourprofile from '@/components/Edityourprofile';
 import DescriptionCard from '@/components/DescriptionCard';
+// import UrlInput from '@/components/UrlInput';
+import { useRouter } from 'next/navigation';
+
+
+
 import SocialMediaIcons from '@/components/socialmediaicons';
 import { FaGithub, FaGitlab, FaBitbucket, FaStackOverflow, FaCodepen, FaDev, FaMedium,
   FaDribbble, FaBehance, FaLinkedin, FaFacebook, FaInstagram, FaYoutube, FaReddit,
@@ -234,7 +239,6 @@ useEffect(() => {
     { name: 'Impact Zone', icon: <LineChart className="w-5 h-5 mr-2" /> },
   ];
 
-
   return (
     <div className="min-h-screen bg-gray-100">
       {/* <Navbar /> */}
@@ -410,18 +414,14 @@ useEffect(() => {
                 <span className="ml-2">{tab.name.toUpperCase()}</span>
               </button>
             ))}
-          </div>
-
-          {/* ////////////////////////////////// */}
-  
+          </div> 
           {/* Tab Content */}
           <div className="mt-8 text-lg text-gray-700 w-full">
             {activeTab === 'Projects' && <ProjectsTab />}
             {activeTab === 'Timeline' && <TimelineTab />}
-            {activeTab === 'Impact Zone' && <ImpactZoneTab />}
+            {activeTab === 'Impact Zone' && <ImpactZonesTab />}
           </div>
         </div>
-                {/* /////////////////////////////////// */}
         <div className="mt-40">
           <FooterLinks />
         </div>

@@ -1,73 +1,32 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FaUserFriends, FaRegCalendarAlt } from "react-icons/fa";
+import { FaRegCalendarAlt, FaMapMarkerAlt } from "react-icons/fa";
 import { GoLocation } from "react-icons/go";
 import { Plus } from "lucide-react";
 import axios from "axios";
+import { FaUserFriends, FaDollarSign } from "react-icons/fa";
+import { GoCalendar } from "react-icons/go";
 
 const email = "omkar@wooble.org";
 const user_id = 9168;
-const encodedData = encodeURIComponent(JSON.stringify({
-  email: "omkar@wooble.org",
-  user_id: 9168,
+const encodedData = encodeURIComponent(
+  JSON.stringify({
+    email: "omkar@wooble.org",
+    user_id: 9168,
+  })
+);
 
-}));
-
- const url = `/impactzonestab?data=${encodedData}`;
-
-
-type Event = {
-  id: number;
-  title: string;
-  organizer: string;
-  date: string;
-  location: string;
-  image: string;
-  attendees: number;
-  type: "event";
+const sanitizeMediaUrl = (encodedPath: string): string => {
+  return `https://wooble.org/dms/${encodedPath}`;
 };
 
-type Hustle = {
-  id: number;
-  title: string;
-  description: string;
-  users: string;
-  revenue: string;
-  date: string;
-  image: string;
-  tools: string[];
-  type: "hustle";
-};
-
-type Award = {
-  id: number;
-  title: string;
-  issuer: string;
-  date: string;
-  image: string;
-  description: string;
-  type: "award";
-};
-
-type Research = {
-  id: number;
-  title: string;
-  field: string;
-  date: string;
-  paperUrl: string;
-  image: string;
-  collaborators: string[];
-  type: "research";
-};
-
-type ImpactItem = Event | Hustle | Award | Research;
-
+// Moved hooks inside the functional component
 const ImpactZonesTab = () => {
   const router = useRouter();
-  const [impacts, setImpacts] = useState([]);
+  const [impacts, setImpacts] = useState<any[]>([]); // Hook moved inside component
   const [loading, setLoading] = useState(true);
-
+  const [imageUrl, setImageUrl] = useState<string>(""); // Hook moved inside component
 
   const [formData, setFormData] = useState({
     title: "",
@@ -82,17 +41,16 @@ const ImpactZonesTab = () => {
     }));
   };
 
-
   const handleSave = async () => {
     try {
       const user_id = sessionStorage.getItem("user_id");
-  
+
       // Save form data
       await axios.post("https://wooble.io/api/portfolio/save_impact.php", {
         ...formData,
         user_id,
       });
-  
+
       // Fetch the saved data after saving
       fetchImpacts(); // Refetch impacts after saving
     } catch (error) {
@@ -100,52 +58,33 @@ const ImpactZonesTab = () => {
     }
   };
 
-  
-  // const handleSave = async () => {
-  //   try {
-  //     const user_id = sessionStorage.getItem("user_id");
-
-  //     // Save form data
-  //     await axios.post("https://wooble.io/api/portfolio/save_impact.php", {
-  //       ...formData,
-  //       user_id,
-  //     });
-
-  //     // Fetch the saved data after saving
-  //     const fetchResponse = await axios.post("https://wooble.io/api/portfolio/fetch_impacts.php", {
-  //       user_id,
-  //     });
-
-  //     // Update impacts with fetched data
-  //     setImpacts(fetchResponse.data.impacts);
-  //     console.log("Fetched impact data:", fetchResponse.data);
-  //   } catch (error) {
-  //     console.error("Error during save or fetch:", error);
-  //   }
-  // };
+  // Handle image URL change (from form input or another source)
+  const handleImageUrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setImageUrl(event.target.value);
+  };
 
   useEffect(() => {
-    axios.get("https://wooble.io/portfolio/editor?tab=impact")
-      .then(res => {
+    axios
+      .get("https://wooble.io/portfolio/editor?tab=impact")
+      .then((res) => {
         console.log("Editor tab request successful:", res.status);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Editor tab request failed:", err);
       });
   }, []);
-  
 
   useEffect(() => {
     // Trigger the editor tab GET request
-    axios.get("https://wooble.io/portfolio/editor?tab=impact")
-      .then(res => {
+    axios
+      .get("https://wooble.io/portfolio/editor?tab=impact")
+      .then((res) => {
         console.log("Editor tab request successful:", res.status);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Editor tab request failed:", err);
       });
   }, []);
-  
 
   useEffect(() => {
     const stored = sessionStorage.getItem("impactFormData");
@@ -155,7 +94,7 @@ const ImpactZonesTab = () => {
       // use it however you like
     }
   }, []);
-  
+
   const fetchImpacts = async () => {
     setLoading(true);
     try {
@@ -174,7 +113,7 @@ const ImpactZonesTab = () => {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     const fetchImpacts = async () => {
       setLoading(true);
@@ -206,94 +145,6 @@ const ImpactZonesTab = () => {
     fetchImpacts();
   }, []);
 
-
-  // useEffect(() => {
-  //   sessionStorage.setItem("email", email);
-  //   sessionStorage.setItem("user_id", user_id.toString());
-  
-  //   const fetchImpacts = async () => {
-  //     setLoading(true);
-  //     try {
-  //       const formData = new URLSearchParams();
-  //       formData.append("user_id", user_id.toString());
-  
-  //       const response = await axios.post(
-  //         "https://wooble.io/api/portfolio/fetch_impacts.php",
-  //         formData,
-  //         {
-  //           headers: {
-  //             "Content-Type": "application/x-www-form-urlencoded",
-  //           },
-  //         }
-  //       );
-  
-  //       if (response.data.success) {
-  //         const impactsData = response.data.impacts
-  //           .map((impact: any): ImpactItem | null => {
-  //             if (impact.type === "event") {
-  //               return {
-  //                 id: impact.id,
-  //                 title: impact.title,
-  //                 organizer: impact.organizer || "Unknown Organizer",
-  //                 date: impact.date,
-  //                 location: impact.location || "Unknown Location",
-  //                 image: `https://wooble.io/upload/${impact.image_url}`,
-  //                 attendees: impact.participants || 0,
-  //                 type: "event",
-  //               };
-  //             } else if (impact.type === "hustle") {
-  //               return {
-  //                 id: impact.id,
-  //                 title: impact.title,
-  //                 description: impact.description,
-  //                 users: impact.users?.toString() || "0",
-  //                 revenue: `$${impact.revenue || "0"}`,
-  //                 date: impact.date,
-  //                 image: `https://wooble.io/upload/${impact.image_url}`,
-  //                 tools: impact.tools_used ? impact.tools_used.split(",") : [],
-  //                 type: "hustle",
-  //               };
-  //             } else if (impact.type === "award") {
-  //               return {
-  //                 id: impact.id,
-  //                 title: impact.title,
-  //                 issuer: impact.award_by || "Unknown Issuer",
-  //                 date: impact.date,
-  //                 image: `https://wooble.io/upload/${impact.image_url}`,
-  //                 description: impact.description || "",
-  //                 type: "award",
-  //               };
-  //             } else if (impact.type === "research") {
-  //               return {
-  //                 id: impact.id,
-  //                 title: impact.title,
-  //                 field: impact.field || "Unknown Field",
-  //                 date: impact.date,
-  //                 paperUrl: impact.paper_url || "",
-  //                 image: `https://wooble.io/upload/${impact.image_url}`,
-  //                 collaborators: impact.collaborators ? impact.collaborators.split(",") : [],
-  //                 type: "research",
-  //               };
-  //             }
-  //             return null;
-  //           })
-  //           .filter((impact: ImpactItem | null): impact is ImpactItem => impact !== null);
-  
-  //         setImpacts(impactsData);
-  //       } else {
-  //         console.warn("No impact data received, using mock fallback.");
-  //         setImpacts([]);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching impacts:", error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-  
-  //   fetchImpacts();
-  // }, []);
-  
   return (
     <div className="relative p-6">
       {/* Plus Button */}
@@ -318,61 +169,141 @@ const ImpactZonesTab = () => {
               key={item.id}
               className="w-full max-w-xs bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col"
             >
-              <div className="relative h-[200px] w-full flex-shrink-0">
-                <img
-                  src={item.image || "/default-image.jpg"}
-                  alt={item.title}
-                  className="w-full h-full object-cover rounded-t-2xl"
-                />
-                {item.date && (
-                  <span className="absolute top-3 left-3 bg-black bg-opacity-60 text-white text-sm px-2 py-1 rounded">
-                    {item.date}
-                  </span>
-                )}
-              </div>
-
-              <div className="flex-grow p-4 flex flex-col justify-between text-sm text-gray-700">
-                <div>
-                  <h2 className="text-xl font-semibold text-gray-800">{item.title}</h2>
-
-                  {item.description && (
-                    <p className="text-sm text-gray-600 mb-2">{item.description}</p>
-                  )}
-
-                  {item.impact_type === "event" ? (
-                    <p className="text-sm text-gray-600 mb-2">{item.organizer}</p>
-                  ) : item.impact_type === "hustle" ? (
-                    <div className="flex justify-between text-xs mb-2">
-                      <span>{item.users}</span>
-                      <span className="text-green-600 font-medium">{item.revenue}</span>
-                      <span>{item.date}</span>
-                    </div>
-                  ) : null}
-
-                  {Array.isArray(item.tools) && item.tools.length > 0 && (
-                    <div className="flex items-center gap-1 text-sm mt-2">
-                      <span>{item.tools.join(", ")}</span>
-                    </div>
+                {/* Image */}
+                <div className="relative h-[200px] w-full flex-shrink-0">
+                  <img
+                    src={item.image || imageUrl || "https://wooble.org/dms/default-image.jpg"} // Replace the fallback URL if necessary
+                    alt={item.title}
+                    className="w-full h-full object-cover rounded-t-2xl"
+                  />
+                  {item.date && (
+                    <span className="absolute top-3 left-3 bg-black bg-opacity-60 text-white text-sm px-2 py-1 rounded">
+                      {item.date}
+                    </span>
                   )}
                 </div>
 
-                <div className="flex justify-between text-sm text-gray-700 flex-wrap gap-2">
-                  {"attendees" in item && (
-                    <div className="flex items-center gap-1">
-                      <FaUserFriends className="text-yellow-500" />
-                      {item.attendees} Attendees
-                    </div>
+              {/* Card Content */}
+              <div className="flex-grow p-4 flex flex-col justify-between text-sm text-gray-700">
+                <div>
+                  {/* Title */}
+                  <h2 className="text-xl font-semibold text-gray-800">{item.title || item.name}</h2>
+          
+                  {/* Description */}
+                  {item.description && (
+                    <p className="text-sm text-gray-600 mb-2">{item.description}</p>
                   )}
-                  {"location" in item && (
-                    <div className="flex items-center gap-1">
-                      <GoLocation className="text-yellow-500" />
-                      {item.location}
+          
+                  {/* Hustle Specific */}
+                  {item.impact_type === "hustle" && (
+                  <>
+                    <div className="flex justify-between items-center text-xs text-gray-700 mb-2">
+                      <div className="flex items-center gap-1">
+                        <FaUserFriends className="text-yellow-500" />
+                        <span>{item.users}</span>
+                        <span>Users</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <FaDollarSign className="text-yellow-500" />
+                        <span>{item.revenue}</span>
+                        <span>Revenue</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <GoCalendar className="text-yellow-500" />
+                        <span>
+                          {item.date
+                            ? new Date(item.date).toLocaleDateString("en-GB")
+                            : "N/A"}
+                        </span>
+                      </div>
+                    </div>
+                    {Array.isArray(item.tools) && item.tools.length > 0 && (
+                      <div className="text-sm mt-2">
+                        <span className="font-medium">Tools:</span> {item.tools.join(", ")}
+                      </div>
+                    )}
+                  </>
+                )}
+
+                
+                  {/* Event Specific */}
+
+                  {item.impact_type === "event" && (
+                    <>
+                      <div className="flex justify-between items-center text-xs text-gray-700 mb-2">
+                        {/* Attendees */}
+                        <div className="flex items-center gap-1">
+                          <FaUserFriends className="text-yellow-500" />
+                          <span>{item.users}</span>
+                          <span>Attendees</span>
+                        </div>
+
+                        {/* Event Date */}
+                        <div className="flex items-center gap-1">
+                          <GoCalendar className="text-yellow-500" />
+                          <span>
+                            {item.date
+                              ? new Date(item.date).toLocaleDateString("en-GB")
+                              : "N/A"}
+                          </span>
+                        </div>
+
+                        {/* Event Location */}
+                        <div className="flex items-center gap-1">
+                          <FaMapMarkerAlt className="text-yellow-500" />
+                          <span>{item.eventLocation || item.location || "N/A"}</span>
+                        </div>
+                      </div>
+
+                      {/* Additional Event Info */}
+                      {item.eventName && (
+                        <div className="text-sm mt-2">
+                          <span className="font-medium">Event Name:</span> {item.eventName}
+                        </div>
+                      )}
+                      {item.eventDescription && (
+                        <div className="text-sm mt-2">
+                          <span className="font-medium">Event Description:</span> {item.eventDescription}
+                        </div>
+                      )}
+                      {item.organizer && (
+                        <div className="text-sm mt-2">
+                          <span className="font-medium">Organizer:</span> {item.organizer}
+                        </div>
+                      )}
+                    </>
+                  )}
+          
+                  {/* Award Specific */}
+                  {item.impact_type === "award" && (
+                    <>
+                      <p className="text-sm mb-1">Organization: {item.awardName}</p>
+                      <p className="text-sm mb-1">Users: {item.awardUsers}</p>
+                    </>
+                  )}
+          
+                  {/* Research Specific */}
+                  {item.impact_type === "research" && (
+                    <>
+                      <p className="text-sm mb-1">Affiliation: {item.researchAffiliation}</p>
+                      <p className="text-sm mb-1">Citation: {item.researchCitation}</p>
+                      <p className="text-sm mb-1">DOI: {item.researchDOI}</p>
+                      {item.researchImpact && (
+                        <p className="text-sm mb-1">Impact: {item.researchImpact}</p>
+                      )}
+                    </>
+                  )}
+          
+                  {/* Tools */}
+                  {Array.isArray(item.tools) && item.tools.length > 0 && (
+                    <div className="text-sm mt-2">
+                      <span className="font-medium">Tools:</span> {item.tools.join(", ")}
                     </div>
                   )}
                 </div>
               </div>
             </div>
-          ))
+          ))          
         )}
       </div>
     </div>

@@ -23,6 +23,13 @@ const AddImpactForm = () => {
     user_id: 9168,
   };
 
+
+  const sanitizeMediaUrl = (encodedPath: string): string => {
+    return `https://wooble.org/dms/${encodedPath}`;
+  };
+  
+  
+
   const [formData, setFormData] = useState<any>(initialFormData);
 
   useEffect(() => {
@@ -48,17 +55,17 @@ const AddImpactForm = () => {
     forceUpdate((prev) => !prev);
   };
 
-  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setMediaPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-      setMediaFile(file);
-    }
-  };
+  // const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setMediaPreview(reader.result as string);
+  //     };
+  //     reader.readAsDataURL(file);
+  //     setMediaFile(file);
+  //   }
+  // };
 
   const removeMedia = () => {
     setMediaPreview(null);
@@ -80,10 +87,10 @@ const AddImpactForm = () => {
       case "award":
         return "https://wooble.io/api/impact/addAward.php";
       default:
-        return "";
+        return "";  // No endpoint for unrecognized options
     }
   };
-
+  
   const handleSubmit = async () => {
     setLoading(true);
     setMessage(null);
@@ -94,8 +101,8 @@ const AddImpactForm = () => {
     // Append shared fields
     payload.append("email", email);
     payload.append("type", selectedOption);
-    payload.append("name", formData.name);
-    payload.append("description", formData.description);
+    payload.append("name", formData.name || "");
+    payload.append("description", formData.description || "");
   
     // Determine endpoint and append type-specific fields
     let endpoint = "";
@@ -103,143 +110,207 @@ const AddImpactForm = () => {
     switch (selectedOption) {
       case "hustle":
         endpoint = "https://wooble.io/api/impact/addHustle.php";
-        payload.append("users", formData.users);
-        payload.append("revenue", formData.revenue);
-        payload.append("impact", formData.impact);
+        payload.append("users", formData.users || "");
+        payload.append("revenue", formData.revenue || "");
+        payload.append("impact", formData.impact || "");
         payload.append("startDate", startDate?.toISOString().split("T")[0] || "");
-        payload.append("tools", Array.isArray(formData.tools) ? JSON.stringify(formData.tools) : formData.tools);
+        payload.append("tools", Array.isArray(formData.tools) ? JSON.stringify(formData.tools) : formData.tools || "");
+        payload.append("media", formData.media || "");
         break;
   
       case "event":
         endpoint = "https://wooble.io/api/impact/addEvent.php";
-        payload.append("name", formData.name);
-        payload.append("description", formData.description);
-        payload.append("location", formData.location);
-        payload.append("attendees", formData.attendees);
-        payload.append("organizer", formData.organizer);
+        
+        // Use the correct field names expected by the API
+        payload.append("email", email);
+        payload.append("eventName", formData.eventName || "");
+        payload.append("eventDescription", formData.eventDescription || "");
+        payload.append("eventOrganization", formData.eventOrganization || "");
         payload.append("eventDate", startDate?.toISOString().split("T")[0] || "");
+        payload.append("eventUsers", formData.eventUsers || "");
+        payload.append("eventLocation", formData.eventLocation || "");
+  
+        // For media, check if there's a file and append it
+        if (formData.media) {
+          payload.append("media", formData.media);
+        }
         break;
+        
+        case "research":
+          endpoint = "https://wooble.io/api/impact/addResearch.php";
+          payload.append("researchName", formData.researchName || "");
+          payload.append("researchDescription", formData.researchDescription || "");
+          payload.append("researchDate", startDate?.toISOString().split("T")[0] || "");
+          payload.append("researchOrganization", formData.researchOrganization || "");
+          payload.append("researchFactor", formData.researchFactor || "");
+          payload.append("researchCitation", formData.researchCitation || "");
+          payload.append("DOILink", formData.DOILink || "");
+          break;
+        
   
-      case "research":
-        endpoint = "https://wooble.io/api/impact/addResearch.php";
-        payload.append("researchTopic", formData.researchTopic);
-        break;
+        case "award":
+          endpoint = "https://wooble.io/api/impact/addAward.php";
+          // Correctly append award-specific fields
+          payload.append("awardName", formData.awardName || "");
+          payload.append("awardDescription", formData.awardDescription || "");
+          payload.append("awardDate", startDate?.toISOString().split("T")[0] || "");
+          payload.append("awardOrganization", formData.awardOrganization || "");
+          payload.append("awardFactor", formData.awardFactor || "");
+          
+          // Ensure that media is correctly added
+          if (formData.media) {
+            payload.append("media", formData.media);
+          }
+          break;
+    
   
-      case "award":
-        endpoint = "https://wooble.io/api/impact/addAward.php";
-        payload.append("awardBy", formData.awardBy);
-        break;
-  
-      default:
-        setMessage({ type: "error", text: "Invalid impact type selected." });
-        setLoading(false);
-        return;
-    }
-  
-    // Append media if available
-    if (mediaFile) {
-      payload.append("media", mediaFile);
-    }
-  
-    try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        body: payload,
-      });
-  
-      const result = await response.json();
-      console.log("API Response:", result);
-  
-      if (result.status) {
-        setMessage({ type: "success", text: `${selectedOption.toUpperCase()} submitted successfully!` });
-      
-        setTimeout(() => {
-          console.log("Redirecting to Account Profile Page");
-          router.push(`/AccountProfilePage??tab=${encodeURIComponent('Impact Zone')} data=${encodeURIComponent(JSON.stringify(formData))}`);
-
-          console.log("Redirecting to Account Profile Page");
-        }, 300); 
+        default:
+          setMessage({ type: "error", text: "Invalid impact type selected." });
+          setLoading(false);
+          return;
       }
-      else {
-        setMessage({ type: "error", text: result.message || "Submission failed." });
-      }      
-    } catch (error) {
-      console.error("Submission failed", error);
-      setMessage({ type: "error", text: "Something went wrong while submitting." });
-    } finally {
-      setLoading(false);
-    }
+    
+      // Append media if available
+      if (mediaFile) {
+        payload.append("media", mediaFile);
+      }
+    
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          body: payload,
+        });
+    
+        const result = await response.json();
+        console.log("API Response:", result);
+    
+        if (result.status) {
+          setMessage({ type: "success", text: `${selectedOption.toUpperCase()} submitted successfully!` });
+        
+          setTimeout(() => {
+            console.log("Redirecting to Account Profile Page");
+            router.push(`/AccountProfilePage?tab=${encodeURIComponent('Impact Zone')}&data=${encodeURIComponent(JSON.stringify(formData))}`);
+          }, 300); 
+        }
+        else {
+          setMessage({ type: "error", text: result.message || "Submission failed." });
+        }      
+      } catch (error) {
+        console.error("Submission failed", error);
+        setMessage({ type: "error", text: "Something went wrong while submitting." });
+      } finally {
+        setLoading(false);
+      }
   };
 
+
   // Reusable Field Components
-  const textField = (label: string, placeholder: string, required = false, key = "") => (
-    <>
-      <label className="block mb-1 font-medium">{label} {required && <span className="text-red-500">*</span>}</label>
-      <input
-        type="text"
-        placeholder={placeholder}
-        required={required}
-        className="w-full border rounded-md p-2 mb-4"
-        onChange={(e) => key && handleInputChange(key, e.target.value)}
-      />
-    </>
-  );
+  // Reusable Field Components
+const textField = (label: string, placeholder: string, required = false, key = "") => (
+  <>
+    <label className="block mb-1 font-medium">{label} {required && <span className="text-red-500">*</span>}</label>
+    <input
+      type="text"
+      placeholder={placeholder}
+      required={required}
+      className="w-full border rounded-md p-2 mb-4"
+      onChange={(e) => key && handleInputChange(key, e.target.value)}
+    />
+  </>
+);
 
-  const numberField = (label: string, placeholder: string, key = "") => (
-    <>
-      <label className="block mb-1 font-medium">{label}</label>
-      <input
-        type="number"
-        placeholder={placeholder}
-        className="w-full border rounded-md p-2 mb-4"
-        onChange={(e) => key && handleInputChange(key, e.target.value)}
-      />
-    </>
-  );
+const numberField = (label: string, placeholder: string, key = "") => (
+  <>
+    <label className="block mb-1 font-medium">{label}</label>
+    <input
+      type="number"
+      placeholder={placeholder}
+      className="w-full border rounded-md p-2 mb-4"
+      onChange={(e) => key && handleInputChange(key, e.target.value)}
+    />
+  </>
+);
 
-  const dateField = (
-    <div>
-      <label className="block mb-1 font-medium">Start Date</label>
-      <DatePicker
-        selected={startDate}
-        onChange={(date: Date | null) => setStartDate(date)}
-        placeholderText="Select a date"
-        className="w-full border rounded-md p-2 mb-4"
-        required
-        dateFormat="yyyy-MM-dd"
-      />
-    </div>
-  );
+const dateField = (
+  <div>
+    <label className="block mb-1 font-medium">Start Date</label>
+    <DatePicker
+      selected={startDate}
+      onChange={(date: Date | null) => setStartDate(date)}
+      placeholderText="Select a date"
+      className="w-full border rounded-md p-2 mb-4"
+      required
+      dateFormat="yyyy-MM-dd"
+    />
+  </div>
+);
 
-  const mediaField = (
-    <>
-      <label className="block mb-1 font-medium">Upload Media</label>
-      <input
-        type="file"
-        accept="image/*,video/*"
-        onChange={handleMediaChange}
-        className="w-full border rounded-md p-2 mb-4"
-      />
-      {mediaPreview && (
-        <div className="mt-2">
-          <button onClick={removeMedia} className="text-white bg-red-500 rounded-md px-2 py-1 mb-2">X</button>
-          {mediaFile?.type.startsWith("image") ? (
-            <img src={mediaPreview} alt="Preview" className="mt-2" />
-          ) : (
-            <video controls className="mt-2"><source src={mediaPreview} /></video>
-          )}
-        </div>
-      )}
-    </>
-  );
+const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-  // utils or your form component
-  const dateplace = (
-    label: string,
-    required: boolean,
-    value: Date | null,
-    onChange: (date: Date | null) => void
-  ) => (
+  setMediaFile(file);
+  setMediaPreview(URL.createObjectURL(file));
+};
+
+
+const mediaField = (
+  <>
+    <label className="block mb-1 font-medium">Upload Media</label>
+    <input
+      type="file"
+      accept="image/*,video/*"
+      onChange={handleMediaChange}
+      className="w-full border rounded-md p-2 mb-4"
+    />
+
+    {mediaPreview && (
+      <div className="mt-2">
+        <button
+          onClick={removeMedia}
+          className="text-white bg-red-500 rounded-md px-2 py-1 mb-2"
+        >
+          X
+        </button>
+
+        {(mediaFile?.type?.startsWith("image") ||
+          (typeof mediaPreview === "string" &&
+            mediaPreview.match(/\.(jpg|jpeg|png|webp|gif)$/i))) ? (
+          <img
+            src={
+              mediaPreview.startsWith("blob:")
+                ? mediaPreview
+                : sanitizeMediaUrl(mediaPreview)
+            }
+            alt="Preview"
+            className="mt-2 rounded max-w-full h-auto"
+          />
+        ) : (
+          <video controls className="mt-2 rounded max-w-full h-auto">
+            <source
+              src={
+                mediaPreview.startsWith("blob:")
+                  ? mediaPreview
+                  : sanitizeMediaUrl(mediaPreview)
+              }
+            />
+          </video>
+        )}
+      </div>
+    )}
+  </>
+);
+
+
+
+
+// utils or your form component
+const dateplace = (
+  label: string,
+  required: boolean,
+  value: Date | null,
+  onChange: (date: Date | null) => void
+) => (
   <div className="w-full mb-4">
     <label className="block mb-1 text-sm font-medium">
       {label} {required && <span className="text-red-500">*</span>}
@@ -335,47 +406,56 @@ const renderForm = () => {
         </>
       );
 
-    case "event":
-      return (
-        <>
-          {textField("Event Name", "Enter event name", true, "name")}
-          {textField("Description", "Event details", false, "description")}
-          {dateField}
-          {textField("Organizer", "Name of the organizer", true, "organizer")}
-          {textField("Location", "Event location", true, "location")}
-          {numberField("Number of Attendees", "Expected number of attendees", "attendees")}
-          {mediaField}
-        </>
-      );
-
-
-      case "award":
+      case "event":
         return (
           <>
-            {textField("Award Name", "Name of the award", true, "name")}
-            {textField("Description", "Award details", false, "description")}
+            {textField("Event Name", "Enter event name", true, "eventName")} {/* Changed name to eventName */}
+            {textField("Description", "Event details", false, "eventDescription")} {/* Changed description to eventDescription */}
             {dateField}
-            {textField("Organization Name", "Name of the Organization", true, "awardName")}
-            {numberField("Users", "Number of users", "awardUsers")}
+            {textField("Organizer", "Name of the organizer", true, "eventOrganization")} {/* Changed organizer to eventOrganization */}
+            {textField("Location", "Event location", true, "eventLocation")} {/* Changed location to eventLocation */}
+            {numberField("Number of Attendees", "Number of attendees", "eventUsers")} {/* Changed to eventUsers */}
             {mediaField}
           </>
         );
+  
+// {dateField}
+//  {textField("Location", "Event location", true, "eventLocation")} {/* Changed location to eventLocation */}
+//  {numberField("Number of Attendees", "Number of attendees", "eventUsers")} {/* Changed to eventUsers */}
 
-        case "research":
+
+        case "award":
           return (
             <>
-              {textField("Research Title", "Title of research", true, "name")}
-              {textField("Research Abstract", "Abstract of research", true, "researchAbstract")}
-              {dateplace("Publication Date", true, startDate, setStartDate)}
-              {textField("Research Affiliation", "Affiliation name", true, "researchAffiliation")}
-              {textField("Research Citation", "Citation number", true, "researchCitation")}
-              {textField("Research Impact", "Impact of research", false, "researchImpact")}
-              {textField("Research DOI", "DOI number", true, "researchDOI")}
+              {textField("Award Name", "Name of the award", true, "awardName")}
+              {textField("Description", "Award details", false, "awardDescription")}
+              {dateField} {/* Date picker for the award date */}
+              {textField("Organization Name", "Name of the Organization", true, "awardOrganization")}
+              {numberField("Award Factor", "Factor for the award", "awardFactor")}
+              {mediaField} {/* Upload field for media */}
             </>
           );
-      default:  
-    }
-  };
+    
+
+          case "research":
+            return (
+              <>
+                {textField("Research Title", "Title of research", true, "researchName")}
+                {textField("Research Abstract", "Abstract of research", true, "researchDescription")}
+                {dateplace("Publication Date", true, startDate, setStartDate)}
+                {textField("Research Affiliation", "Affiliation name", true, "researchOrganization")}
+                {textField("Research Citation", "Citation number", true, "researchCitation")}
+                {textField("Research Impact", "Impact of research", false, "researchFactor")}
+                {textField("Research DOI", "DOI number", true, "DOILink")}
+              </>
+            );
+          
+
+    default:
+      return null;
+  }
+};
+
 
   return (
     <div className="max-w-xl mx-auto p-6 border rounded-md shadow-md">
@@ -414,3 +494,6 @@ const renderForm = () => {
 };
 
 export default AddImpactForm;
+
+
+

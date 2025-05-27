@@ -55,17 +55,19 @@ const AddImpactForm = () => {
     forceUpdate((prev) => !prev);
   };
 
-  // const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files?.[0];
-  //   if (file) {
-  //     const reader = new FileReader();
-  //     reader.onloadend = () => {
-  //       setMediaPreview(reader.result as string);
-  //     };
-  //     reader.readAsDataURL(file);
-  //     setMediaFile(file);
-  //   }
-  // };
+  const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setMediaFile(file);
+  
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setMediaPreview(reader.result as string); // This is Base64 string
+      };
+      reader.readAsDataURL(file); // Convert to Base64
+    }
+  };
+  
 
   const removeMedia = () => {
     setMediaPreview(null);
@@ -245,15 +247,6 @@ const dateField = (
   </div>
 );
 
-const handleMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
-
-  setMediaFile(file);
-  setMediaPreview(URL.createObjectURL(file));
-};
-
-
 const mediaField = (
   <>
     <label className="block mb-1 font-medium">Upload Media</label>
@@ -274,32 +267,22 @@ const mediaField = (
         </button>
 
         {(mediaFile?.type?.startsWith("image") ||
-          (typeof mediaPreview === "string" &&
-            mediaPreview.match(/\.(jpg|jpeg|png|webp|gif)$/i))) ? (
+          (typeof mediaPreview === "string" && mediaPreview.startsWith("data:image"))) ? (
           <img
-            src={
-              mediaPreview.startsWith("blob:")
-                ? mediaPreview
-                : sanitizeMediaUrl(mediaPreview)
-            }
+            src={mediaPreview}
             alt="Preview"
             className="mt-2 rounded max-w-full h-auto"
           />
         ) : (
           <video controls className="mt-2 rounded max-w-full h-auto">
-            <source
-              src={
-                mediaPreview.startsWith("blob:")
-                  ? mediaPreview
-                  : sanitizeMediaUrl(mediaPreview)
-              }
-            />
+            <source src={mediaPreview} />
           </video>
         )}
       </div>
     )}
   </>
 );
+
 
 
 

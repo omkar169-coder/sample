@@ -1,8 +1,22 @@
 'use client';
 import React from 'react';
+import { FiPlus } from 'react-icons/fi';
+import { useRouter } from 'next/navigation';
+
+// ✅ Define the type
+type TimelineItemType = {
+  id: number;
+  title: string;
+  company: string;
+  date: string;
+  type: 'Experience' | 'Education' | 'Certification';
+  description: string;
+  logo: string;
+};
 
 const TimelineTab = () => {
-  const timeline = [
+  // ✅ Rename to avoid redeclaration
+  const initialTimeline: TimelineItemType[] = [
     {
       id: 4,
       title: "Founder & CEO",
@@ -41,6 +55,9 @@ const TimelineTab = () => {
     }
   ];
 
+  const [timeline, setTimeline] = React.useState<TimelineItemType[]>(initialTimeline);
+  const router = useRouter();
+
   const getYear = (date: string): number =>
     new Date(date.split('-')[0].trim()).getFullYear();
 
@@ -50,14 +67,24 @@ const TimelineTab = () => {
   return (
     <div className="flex justify-center px-4 py-10 bg-gray-50 min-h-[20vh]">
       <div className="relative w-full max-w-5xl">
+        {/* Plus Button */}
+        <div className="absolute top-0 right-0 mt-2 mr-2">
+          <button
+            className="bg-gray-200 hover:bg-gray-300 p-2 rounded-sm shadow-md"
+            onClick={() => router.push('/add-timeline-entry')}
+          >
+            <FiPlus className="text-black text-lg" />
+          </button>
+        </div>
+
         {/* Vertical line */}
         <div className="absolute left-4 md:left-8 top-0 bottom-0 w-0.5 bg-black"></div>
-  
+
         {sorted.map((item) => {
           const currentYear = getYear(item.date);
           const showYear = currentYear !== lastYear;
           lastYear = currentYear;
-  
+
           return (
             <div key={item.id} className="relative flex flex-col items-start mt-10 mb-14">
               {/* Year label */}
@@ -69,12 +96,12 @@ const TimelineTab = () => {
                   </div>
                 </div>
               )}
-  
+
               {/* Dot */}
               <div className="absolute ml-4 md:ml-8 -left-4 md:-left-4 top-10 w-6 h-6 md:w-8 md:h-8 rounded-full bg-black text-white flex items-center justify-center text-xs md:text-sm font-semibold z-20">
                 {item.id}
               </div>
-  
+
               {/* Timeline Card */}
               <div className="ml-16 md:ml-24 p-4 md:p-6 bg-white shadow-md rounded-lg flex flex-col md:flex-row items-start gap-4 relative z-10
                 w-[90%] max-w-[700px] sm:w-[85%] md:w-[75%] lg:w-[65%] xl:w-[50%]">
@@ -105,6 +132,6 @@ const TimelineTab = () => {
       </div>
     </div>
   );
-}  
+};
 
 export default TimelineTab;

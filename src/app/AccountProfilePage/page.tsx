@@ -356,8 +356,7 @@ useEffect(() => {
                     </div>
                   )}
                 </div>
-
-
+                
               <button
                 className="text-blue-500 hover:text-blue-700 transition font-bold flex-shrink-0"
                 onClick={() => setShowAddSkills(true)}
@@ -417,7 +416,7 @@ useEffect(() => {
           </div> 
           {/* Tab Content */}
           <div className="mt-8 text-lg text-gray-700 w-full">
-            {activeTab === 'Projects' && <ProjectsTab />}
+            {activeTab === 'Projects' && <ProjectsTab /> }
             {activeTab === 'Timeline' && <TimelineTab />}
             {activeTab === 'Impact Zone' && <ImpactZonesTab />}
           </div>
@@ -459,7 +458,7 @@ useEffect(() => {
               onSubmit={(newDescription) => {
                 setProfileData(prev => ({
                   ...prev,
-                  about: newDescription // <-- only updates the "This is me" text
+                  about: newDescription 
                 }));
                 setIsDescriptionEditOpen(false);
               }}

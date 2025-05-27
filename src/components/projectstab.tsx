@@ -1,8 +1,11 @@
+
 "use client";
 
-import { Eye, FileText, MoreVertical, Image as ImageIcon, Video, Music, FileCode, FileArchive, 
-  FileSpreadsheet, FileAudio, FileSignature, FilePlus, FileInput, } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Plus, MoreVertical, FileText, Image as ImageIcon, Video, Music, FileCode, FileArchive, FileSpreadsheet, FileAudio, FileSignature, FilePlus, FileInput } from "lucide-react";
 import ClapButton from "@/components/clapbutton";
+
 interface Project {
   id: number;
   title: string;
@@ -19,26 +22,40 @@ interface Project {
   collaborationType: string;
   claps: number;
   imageUrl: string;
-
-
-  user_id?: number;
-  project_title: string;
-  project_duration: string;
-  technologies_used: string;
-  project_description: string;
-  project_type: string;
-  associated_with: string;
-  skills_used: string[];
-  project_link: string;
-  github_demo_link?: string;
-  project_impact?: string;
-  project_visibility?: string;
-  banner_image?: string;
-  proof_of_work: string | File;
-  
 }
 
-type ProjectData = Omit<Project, "id" | "claps" | "imageUrl">;
+export default function ProjectsTab() {
+  const router = useRouter();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
+
+  const toggleDropdown = (id: number) => {
+    setActiveDropdown(activeDropdown === id ? null : id);
+  };
+
+  useEffect(() => {
+    const storedProjects = localStorage.getItem("projects");
+    if (storedProjects) {
+      setProjects(JSON.parse(storedProjects));
+    }
+  }, []);
+
+  const handleAddProject = () => {
+    router.push("/add-projects");
+  };
+
+  const handleEdit = (project: Project) => {
+    console.log("Edit project", project);
+  };
+
+  const handleDelete = (id: number) => {
+    const updated = projects.filter((p) => p.id !== id);
+    setProjects(updated);
+    localStorage.setItem("projects", JSON.stringify(updated));
+  };
+  
+
+
 
 const getFileExtension = (fileName: string): string => {
   return fileName.split(".").pop()?.toLowerCase() || "";
@@ -74,262 +91,97 @@ const renderFileIcon = (file: File | string | null) => {
   return <FileText className="w-5 h-5 text-gray-500" />;
 };
 
-interface ProjectCardProps {
-  project: Project;
-  onEdit: (p: Project) => void;
-  onDelete: (id: number) => void;
-}
-
-const ProjectCard = ({ project, onEdit, onDelete }: ProjectCardProps) => {
-  const [menuOpen, setMenuOpen] = useState(false);
-
   return (
-    <div className="w-full max-w-sm bg-white rounded-2xl shadow-md overflow-hidden relative">
-      <img
-        className="w-full h-48 object-cover rounded-t-2xl"
-        src={project.imageUrl}
-        alt={project.title}
-      />
-      <div className="p-4">
-        <h3 className="text-lg font-semibold text-blue-600">{project.title}</h3>
-
-        <div className="flex items-center justify-between mt-2 text-gray-600 font-medium text-sm">
-          <div className="flex items-center gap-3">
-            <ClapButton />
-            <span>{project.claps} claps</span>
-          </div>
-
-          {project.proof && (
-            <div className="flex items-center gap-1">
-              {renderFileIcon(project.proof)}
-              <span className="capitalize">
-                {typeof project.proof === "string"
-                  ? getFileExtension(project.proof)
-                  : getFileExtension(project.proof.name)}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div className="absolute top-3 right-3">
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="p-1 rounded hover:bg-gray-100"
-          >
-            <MoreVertical className="w-5 h-5" />
-          </button>
-          {menuOpen && (
-            <div className="absolute right-0 mt-2 w-28 bg-white shadow-md rounded-md z-10">
-              <button
-                onClick={() => {
-                  setMenuOpen(false);
-                  onEdit(project);
-                }}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => {
-                  setMenuOpen(false);
-                  onDelete(project.id);
-                }}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500"
-              >
-                Delete
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-
-import { useState } from "react";
-import { Plus } from "lucide-react";
-import Projectstabform from "@/components/Projectstabform";
-
-
-type ProjectFormData = { 
-  id: number; 
-  user_id: number; 
-  project_title: string; 
-  project_duration: string; 
-  technologies_used: string; 
-  visibility: string; 
-  project_description: string; 
-  project_type: string; 
-  associated_with: string; 
-  proof_of_work: string; 
-  github_demo_link: string; 
-  project_impact: string; 
-  collaboration_type: string; 
-  claps: number; 
-  banner_image: string; 
-  project_visibility: string; 
-  skills_used: string[]; 
-  project_link: string;
-};
-
-
-const Projectstab = () => {
-  const [showForm, setShowForm] = useState(false);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [editingProject, setEditingProject] = useState<Project | null>(null);
-
-  const handleAddProject = (data: Project, isEdit = false) => {
-    if (isEdit && editingProject) {
-      setProjects((prev) =>
-        prev.map((proj) =>
-          proj.id === editingProject.id ? { ...proj, ...data } : proj
-        )
-      );
-    } else {
-      const newProject: Project = {
-        ...data,
-        id: Date.now(),
-        claps: 0,
-  
-        imageUrl: `https://source.unsplash.com/400x200?project&sig=${data.id}`,
-
-        collaborationType: "", // Default value for collaborationType
-      };
-      setProjects((prev) => [newProject, ...prev]);
-    }
-  
-    setEditingProject(null);
-    setShowForm(false);
-  };
-  
-
-  const handleDelete = (id: number) => {
-    setProjects((prev) => prev.filter((proj) => proj.id !== id));
-  };
-
-  const handleEdit = (project: Project) => {
-    setEditingProject(project);
-    setShowForm(true);
-  };
-
-
-  interface ProjectstabformProps {
-    onSubmit: (data: ProjectData) => void;
-    onBack: () => void;
-    defaultValues?: Project;
-  }
-
-  return (
-    <div className="p-10 bg-gray-50 min-h-screen flex flex-col items-center">
-      <div className="flex justify-end w-full max-w-7xl px-4">
-      {!showForm && (
+    <div className="w-full px-4 py-6">
+      <div className="flex justify-end mb-4">
         <button
-          onClick={() => {
-            setEditingProject(null);
-            setShowForm(true);
-          }}
-          className="p-2 rounded-md bg-gray-100 hover:bg-gray-200 shadow"
+          onClick={handleAddProject}
+          className="w-10 h-10 flex items-center justify-center rounded-md bg-gray-100 hover:bg-gray-200 shadow-sm"
         >
           <Plus className="h-5 w-5 text-gray-600" />
         </button>
-      )}
-    </div>
-
-    {showForm ? (
-      <div className="w-full max-w-4xl mt-6">
-        <Projectstabform
-          onSubmit={(data: ProjectFormData) => {
-            const fullProject: Project = {
-              ...data,
-              id: editingProject?.id || Date.now(),
-              claps: editingProject?.claps || 0,
-              imageUrl: data.banner_image || editingProject?.imageUrl || "https://source.unsplash.com/random/400x200?project",
-              collaborationType: data.collaboration_type || editingProject?.collaborationType || "",
-              title: data.project_title,
-              duration: data.project_duration,
-              technologies: data.technologies_used,
-              visibility: data.visibility,
-              description: data.project_description,
-              type: data.project_type,
-              association: data.associated_with,
-              proof: typeof data.proof_of_work === 'string' ? data.proof_of_work : '',
-              github_demo_link: data.github_demo_link,
-              projectImpact: data.project_impact,
-              project_visibility: data.project_visibility,
-              link: data.project_link,
-              skills: Array.isArray(data.skills_used) ? data.skills_used.join(", ") : data.skills_used,
-              user_id: data.user_id,
-            };
-            handleAddProject(fullProject, editingProject !== null);
-          }}
-          onBack={() => {
-            setEditingProject(null);
-            setShowForm(false);
-          }}
-          projectId={editingProject?.id || Date.now()}
-          defaultValues={
-            editingProject
-              ? {
-                  id: editingProject.id,
-                  claps: editingProject.claps,
-                  user_id: editingProject.user_id ?? 0, 
-                  project_title: editingProject.title,
-                  project_duration: editingProject.duration,
-                  technologies_used: editingProject.technologies,
-                  visibility: editingProject.visibility,
-                  project_description: editingProject.description,
-                  project_type: editingProject.type,
-                  associated_with: editingProject.association,
-                  proof_of_work: typeof editingProject.proof === 'string' ? editingProject.proof : '',
-                  github_demo_link: editingProject.github_demo_link || "",
-                  project_impact: editingProject.projectImpact || "",
-                  project_visibility: editingProject.project_visibility || "",
-                  project_link: editingProject.link,
-                  collaboration_type: editingProject.collaborationType,
-                  banner_image: editingProject.imageUrl,
-                  skills_used: Array.isArray(editingProject.skills) ? editingProject.skills : [],
-                }
-              : undefined
-          }
-        />
       </div>
-    ) : projects.length === 0 ? (
-      <div className="mt-4 w-full max-w-7xl bg-white rounded-2xl shadow-md p-6 space-y-4">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">
-            Showcase Your Real Work
-          </h2>
-          <div className="flex items-center text-sm text-gray-500 mt-1">
-            <Eye className="w-4 h-4 mr-1" />
-            Private to you
+
+      {/* Conditionally show introduction */}
+      {projects.length === 0 && (
+        <div className="rounded-3xl shadow-md border bg-white p-6 flex flex-col gap-3 max-w-4xl mx-auto">
+          <h2 className="text-2xl font-semibold text-gray-900">Showcase Your Real Work</h2>
+
+          <div className="flex items-center text-sm text-gray-500 gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" className="w-4 h-4">
+              <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zM8 4a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm1 3.002H7v5h2v-5z" />
+            </svg>
+            <span>Private to you</span>
+          </div>
+
+          <div className="flex items-start gap-3 text-gray-800 text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" className="w-5 h-5 mt-1">
+              <path d="M4 0h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2zM3 3v10h10V3H3z" />
+            </svg>
+            <p>
+              Upload projects with tangible proofs—images, videos, or links—that capture your passion and creativity. Let
+              your work speak volumes about your dedication!
+            </p>
           </div>
         </div>
-        <div className="flex items-start text-gray-700 text-sm">
-          <FileText className="w-5 h-5 mt-1 mr-2 text-gray-500" />
-          <p>
-            Upload projects with tangible proofs—images, videos, or links—that
-            capture your passion and creativity. Let your work speak volumes
-            about your dedication!
-          </p>
-        </div>
-      </div>
-    ) : (
-      <div className="mt-8 w-full max-w-7xl h-[70vh] overflow-y-auto custom-scrollbar px-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
-          {projects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          ))}
-        </div>
-      </div>
-    )}
-  </div>
-);
-};
+      )}
 
-export default Projectstab;
+      {/* Show project cards if available */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+        {projects.map((project) => (
+          <div key={project.id} className="w-full max-w-sm bg-white rounded-2xl shadow-md overflow-hidden relative">
+            {/* <img className="w-full h-48 object-cover rounded-t-2xl" src={project.imageUrl} alt={project.title} /> */}
+            <img
+        className="w-full h-48 object-cover rounded-t-2xl"
+        src={project.imageUrl || "/placeholder-image.jpg"}
+        alt={project.title}
+      />
+
+            <div className="p-4">
+              <h3 className="text-lg font-semibold text-blue-600">{project.title}</h3>
+              <p className="text-sm text-gray-500 mt-1 line-clamp-2">{project.description}</p>
+
+              <div className="flex items-center justify-between mt-2 text-gray-600 font-medium text-sm">
+                <div className="flex items-center gap-3">
+                  <ClapButton />
+                  <span>{project.claps} claps</span>
+                </div>
+
+                {project.proof && (
+                  <div className="flex items-center gap-1">
+                    {renderFileIcon(project.proof)}
+                    <span className="capitalize">
+                      {typeof project.proof === "string"
+                        ? getFileExtension(project.proof)
+                        : getFileExtension(project.proof.name)}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="absolute top-3 right-3">
+              <button onClick={() => toggleDropdown(project.id)} className="p-1 rounded hover:bg-gray-100">
+                  <MoreVertical className="w-5 h-5" />
+                </button>
+                {activeDropdown === project.id && (
+                  <div className="absolute right-0 mt-2 w-28 bg-white shadow-md rounded-md z-10">
+                    <button onClick={() => handleEdit(project)} className="w-full text-left px-4 py-2 hover:bg-gray-100">
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(project.id)}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+

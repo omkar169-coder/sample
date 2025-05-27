@@ -21,6 +21,7 @@ const sanitizeMediaUrl = (encodedPath: string): string => {
   return `https://wooble.org/dms/${encodedPath}`;
 };
 
+
 // Moved hooks inside the functional component
 const ImpactZonesTab = () => {
   const router = useRouter();
@@ -151,7 +152,7 @@ const ImpactZonesTab = () => {
       <div className="flex justify-end mb-6">
         <button
           onClick={() => router.push("/add-impact")}
-          className="p-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 shadow transition"
+          className="p-2 rounded-md bg-white-200 text-black hover:bg-blue-700 shadow-lg transition"
         >
           <Plus className="h-5 w-5" />
         </button>
@@ -171,16 +172,19 @@ const ImpactZonesTab = () => {
             >
                 {/* Image */}
                 <div className="relative h-[200px] w-full flex-shrink-0">
-                  <img
-                    src={item.image || imageUrl || "https://wooble.org/dms/default-image.jpg"} // Replace the fallback URL if necessary
-                    alt={item.title}
-                    className="w-full h-full object-cover rounded-t-2xl"
-                  />
-                  {item.date && (
-                    <span className="absolute top-3 left-3 bg-black bg-opacity-60 text-white text-sm px-2 py-1 rounded">
-                      {item.date}
-                    </span>
-                  )}
+                <img
+                  src={
+                    item.image?.startsWith("data:image")
+                      ? item.image
+                      : item.image?.length > 100 // assuming base64 or valid image string
+                      ? `data:image/jpeg;base64,${item.image}`
+                      : item.image // this might be a full external URL if applicable
+                      ? sanitizeMediaUrl(item.image) // this should build the actual wooble.org/dms/... path
+                      : "/default-image.jpg" // fallback to public/default-image.jpg
+                  }
+                  alt={item.title || "Default Image"} // Add alt for better accessibility
+                  className="w-full h-full object-cover rounded-t-2xl"
+                />
                 </div>
 
               {/* Card Content */}

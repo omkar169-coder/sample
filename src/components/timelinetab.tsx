@@ -3,9 +3,9 @@ import React from 'react';
 import { FiPlus } from 'react-icons/fi';
 import { useRouter } from 'next/navigation';
 
-// ✅ Define the type
 type TimelineItemType = {
   id: number;
+  // email: string;
   title: string;
   company: string;
   date: string;
@@ -15,53 +15,110 @@ type TimelineItemType = {
 };
 
 const TimelineTab = () => {
-  // ✅ Rename to avoid redeclaration
-  const initialTimeline: TimelineItemType[] = [
-    {
-      id: 4,
-      title: "Founder & CEO",
-      company: "Wooble Software Private Limited (wooble.io)",
-      date: "Feb 22, 2022 - Ongoing",
-      type: "Experience",
-      description: "Execution and team building",
-      logo: "https://wooble.org/dms/dGltZWxpbmUtcGljXzY3Y2FhNWIxN2IxZjM5LjMxODU0OTMwLndlYnA="
-    },
-    {
-      id: 3,
-      title: "Founder & CEO",
-      company: "Wooble",
-      date: "Feb 17, 2022 - Feb 15, 2024",
-      type: "Experience",
-      description: "On-Site",
-      logo: "https://wooble.org/dms/dGltZWxpbmUtcGljXzY3MzFhNGZmMzg4MjkyLjg2NDcyMzEzLndlYnA="
-    },
-    {
-      id: 2,
-      title: "Stanford University",
-      company: "Masters",
-      date: "Sep 12, 2022 - Sep 14, 2023",
-      type: "Education",
-      description: "Executive MBA in Entrepreneurship",
-      logo: "https://wooble.org/dms/dGltZWxpbmUtcGljXzY3YmVmNDIwZWM2YTA1LjAzNjEzNjk4LndlYnA="
-    },
-    {
-      id: 1,
-      title: "KIIT University",
-      company: "Bachelor in Technology",
-      date: "Jul 18, 2016 - May 13, 2020",
-      type: "Education",
-      description: "Computer Science & Communication Engineering",
-      logo: "https://wooble.org/dms/dGltZWxpbmUtcGljXzY3M2YyZWM3MTQ4NzI0LjI5MzI5Mzc2LndlYnA="
-    }
-  ];
-
-  const [timeline, setTimeline] = React.useState<TimelineItemType[]>(initialTimeline);
   const router = useRouter();
+  
+  const [timeline, setTimeline] = React.useState<TimelineItemType[]>([]);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const fetchTimeline = async () => {
+      setLoading(true);
+      setError(null);
+  
+      try {
+        const response = await fetch("https://wooble.io/api/portfolio/fetch_timeline.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({
+            user_id: "9168",
+            email: "omkar@wooble.org",
+            username: "muralaomkar2",
+          }),
+        });
+  
+        const json = await response.json();
+        console.log("Timeline API response:", json);
+  
+        if (!json.success) {
+          throw new Error(json.message || "API returned an error");
+        }
+  
+        const formatDateRange = (start: string, end: string): string => {
+          if (start && end) return `${start} - ${end}`;
+          if (start) return start;
+          if (end) return end;
+          return "";
+        };
+  
+        const mappedItems: TimelineItemType[] = [];
+        const data = json.data;
+  
+        if (data.education) {
+          Object.values(data.education).forEach((entry: any) => {
+            mappedItems.push({
+              id: parseInt(entry.entry_id) || Date.now(),
+              // email: "omkar@wooble.org",
+              title: entry.title || "",
+              company: entry.subtitle || "",
+              date: formatDateRange(entry.start_date, entry.end_date),
+              type: "Education",
+              description: entry.description || "",
+              logo: entry.img || "",
+            });
+          });
+        }
+  
+        if (Array.isArray(data.experience)) {
+          data.experience.forEach((entry: any) => {
+            mappedItems.push({
+              id: parseInt(entry.entry_id) || Date.now(),
+              // email: "omkar@wooble.org",
+              title: entry.title || "",
+              company: entry.subtitle || "",
+              date: formatDateRange(entry.start_date, entry.end_date),
+              type: "Experience",
+              description: entry.description || "",
+              logo: entry.img || "",
+            });
+          });
+        }
+  
+        if (Array.isArray(data.certifications)) {
+          data.certifications.forEach((entry: any) => {
+            mappedItems.push({
+              id: parseInt(entry.entry_id) || Date.now(),
+              // email: "omkar@wooble.org",
+              title: entry.title || "",
+              company: entry.subtitle || "",
+              date: formatDateRange(entry.start_date, entry.end_date),
+              type: "Certification",
+              description: entry.description || "",
+              logo: entry.img || "",
+            });
+          });
+        }
+
+        console.log("Mapped timeline items:", mappedItems); 
+        
+        setTimeline(mappedItems);
+      } catch (err: any) {
+        console.error("Error fetching timeline:", err);
+        setError(err.message || "Unknown error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchTimeline();
+  }, []);  
 
   const getYear = (date: string): number =>
     new Date(date.split('-')[0].trim()).getFullYear();
 
-  const sorted = timeline.sort((a, b) => b.id - a.id);
+  const sorted = [...timeline].sort((a, b) => b.id - a.id);
   let lastYear: number | null = null;
 
   return (
@@ -72,6 +129,7 @@ const TimelineTab = () => {
           <button
             className="bg-gray-200 hover:bg-gray-300 p-2 rounded-sm shadow-md"
             onClick={() => router.push('/add-timeline-entry')}
+            aria-label="Add timeline entry"
           >
             <FiPlus className="text-black text-lg" />
           </button>
@@ -80,7 +138,20 @@ const TimelineTab = () => {
         {/* Vertical line */}
         <div className="absolute left-4 md:left-8 top-0 bottom-0 w-0.5 bg-black"></div>
 
-        {sorted.map((item) => {
+        {loading && (
+          <p className="text-center text-gray-500 mt-20">Loading timeline entries...</p>
+        )}
+
+        {error && (
+          <p className="text-center text-red-500 mt-20">Error: {error}</p>
+          
+        )}
+
+        {!loading && !error && sorted.length === 0 && (
+          <p className="text-center text-gray-500 mt-20">No timeline entries yet. Add one!</p>
+        )}
+
+        {!loading && !error && sorted.map((item) => {
           const currentYear = getYear(item.date);
           const showYear = currentYear !== lastYear;
           lastYear = currentYear;
@@ -105,11 +176,17 @@ const TimelineTab = () => {
               {/* Timeline Card */}
               <div className="ml-16 md:ml-24 p-4 md:p-6 bg-white shadow-md rounded-lg flex flex-col md:flex-row items-start gap-4 relative z-10
                 w-[90%] max-w-[700px] sm:w-[85%] md:w-[75%] lg:w-[65%] xl:w-[50%]">
-                <img
-                  src={item.logo}
-                  alt={item.title}
-                  className="w-20 h-20 md:w-28 md:h-28 object-contain"
-                />
+                {item.logo ? (
+                  <img
+                    src={item.logo}
+                    alt={item.title}
+                    className="w-20 h-20 md:w-28 md:h-28 object-contain"
+                  />
+                ) : (
+                  <div className="w-20 h-20 md:w-28 md:h-28 bg-gray-200 flex items-center justify-center text-gray-400 text-sm">
+                    No Logo
+                  </div>
+                )}
                 <div>
                   <div className="text-xs md:text-sm text-gray-500">{item.date}</div>
                   <h3 className="font-semibold text-base md:text-lg">{item.title}</h3>
@@ -135,3 +212,4 @@ const TimelineTab = () => {
 };
 
 export default TimelineTab;
+

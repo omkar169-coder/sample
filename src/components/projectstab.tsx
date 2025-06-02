@@ -1,9 +1,22 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, MoreVertical, FileText, Image as ImageIcon, Video, Music, FileCode, FileArchive, FileSpreadsheet, FileAudio, FileSignature, FilePlus, FileInput } from "lucide-react";
+import {
+  Plus,
+  MoreVertical,
+  FileText,
+  Image as ImageIcon,
+  Video,
+  Music,
+  FileCode,
+  FileArchive,
+  FileSpreadsheet,
+  FileAudio,
+  FileSignature,
+  FilePlus,
+  FileInput,
+} from "lucide-react";
 import ClapButton from "@/components/clapbutton";
 
 interface Project {
@@ -26,20 +39,115 @@ interface Project {
 
 export default function ProjectsTab() {
   const router = useRouter();
-  const [projects, setProjects] = useState<Project[]>([]);
+  // const [projects, setProjects] = useState<any[]>([]);
+  const [projects, setProjects] = useState<Project[]>([
+    {
+      id: 1,
+      title: "Sample Project",
+      duration: "3 months",
+      technologies: "React, Node.js",
+      visibility: "public",
+      description: "A mock project for testing",
+      type: "Academic",
+      skills: "JavaScript, HTML, CSS",
+      association: "College",
+      proof: null,
+      link: "https://example.com",
+      projectImpact: "Improved user experience",
+      collaborationType: "Team",
+      claps: 10,
+      imageUrl: "/",
+    },
+  ]);
+  
   const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
+  const username = "muralaomkar2";
 
   const toggleDropdown = (id: number) => {
     setActiveDropdown(activeDropdown === id ? null : id);
   };
 
+  // useEffect(() => {
+  //   const fetchProjects = async () => {
+  //     try {
+  //         const res = await fetch("https://wooble.io/api/project/fetchProject_from_username.php", {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/x-www-form-urlencoded",
+  //           },
+  //           body: new URLSearchParams({ username: "muralaomkar2" }),
+  //         });
+  
+  //         const data = await res.json();
+  //         console.log("API response murala:", data);
+  
+  //         if (data.success) {
+  //           console.log("Fetched projects:", data.projects);
+  //         } else {
+  //           console.error("Failed to fetch projects:", data.message);
+  //         }
+  //     } catch (error) {
+  //       console.error("Failed to fetch projects", error);
+  //     }
+  //   };
+  
+  //   fetchProjects();
+  // }, []);
+  
+  
   useEffect(() => {
-    const storedProjects = localStorage.getItem("projects");
-    if (storedProjects) {
-      setProjects(JSON.parse(storedProjects));
-    }
-  }, []);
+    const fetchProjects = async () => {
+      try {
+        const res = await fetch("https://wooble.io/api/project/fetchProject_from_username.php", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({ username: "muralaomkar2" }),
+        });
+  
+        const data = await res.json();
+  
 
+        console.log("API response murala:", data);
+  
+        if (data.success) {
+          // console.log("Fetched projects:", data.projects);
+          // setProjects(data.data); 
+          // setProjects(data.data.projects);
+          const projectsFromApi = data.data.projects;
+          const mappedProjects = projectsFromApi.map((p: any) => ({
+            id: p.project_id,
+            title: p.title,
+            duration: p.duration,
+            technologies: p.technologies,
+            visibility: p.visibility,
+            description: p.description,
+            type: p.type,
+            skills: p.skills,
+            association: p.association,
+            proof: p.proof,
+            link: p.link,
+            projectImpact: p.project_impact,
+            collaborationType: p.collaboration_type,
+            claps: p.claps,
+            imageUrl: p.image_url || "/",
+          }));
+          setProjects(mappedProjects);
+        
+
+        } else {
+          console.error("Failed to fetch projects:", data.message);
+          // console.error("Failed to fetch projects", data.error);
+        }
+      } catch (error) {
+        console.error("Failed to fetch projects", error);
+      }
+    };
+  
+    fetchProjects();
+  }, []);
+  
   const handleAddProject = () => {
     router.push("/add-projects");
   };
@@ -53,43 +161,40 @@ export default function ProjectsTab() {
     setProjects(updated);
     localStorage.setItem("projects", JSON.stringify(updated));
   };
-  
 
+  const getFileExtension = (fileName: string): string => {
+    return fileName.split(".").pop()?.toLowerCase() || "";
+  };
 
+  const renderFileIcon = (file: File | string | null) => {
+    if (!file) return null;
+    const fileName = typeof file === "string" ? file : file.name;
+    const ext = getFileExtension(fileName);
 
-const getFileExtension = (fileName: string): string => {
-  return fileName.split(".").pop()?.toLowerCase() || "";
-};
+    const docTypes = ["pdf", "doc", "docx", "rtf", "odt", "txt", "md"];
+    const imageTypes = ["png", "jpg", "jpeg", "gif", "bmp", "webp", "svg", "tiff", "heic"];
+    const videoTypes = ["mp4", "mov", "webm", "avi", "mkv", "flv", "wmv"];
+    const audioTypes = ["mp3", "wav", "aac", "ogg", "flac", "m4a"];
+    const codeTypes = ["html", "js", "ts", "tsx", "css", "scss", "json", "py", "java", "cpp", "c", "cs", "xml", "php", "sql", "rb", "go", "rs"];
+    const archiveTypes = ["zip", "rar", "7z", "tar", "gz", "bz2"];
+    const spreadsheetTypes = ["xls", "xlsx", "csv", "ods"];
+    const signatureTypes = ["sig", "p7s"];
+    const formTypes = ["form", "input", "output"];
+    const genericTypes = ["apk", "exe", "dmg", "iso"];
 
-const renderFileIcon = (file: File | string | null) => {
-  if (!file) return null;
-  const fileName = typeof file === "string" ? file : file.name;
-  const ext = getFileExtension(fileName);
+    if (docTypes.includes(ext)) return <FileText className="w-5 h-5 text-gray-500" />;
+    if (imageTypes.includes(ext)) return <ImageIcon className="w-5 h-5 text-gray-500" />;
+    if (videoTypes.includes(ext)) return <Video className="w-5 h-5 text-gray-500" />;
+    if (audioTypes.includes(ext)) return <Music className="w-5 h-5 text-gray-500" />;
+    if (codeTypes.includes(ext)) return <FileCode className="w-5 h-5 text-gray-500" />;
+    if (archiveTypes.includes(ext)) return <FileArchive className="w-5 h-5 text-gray-500" />;
+    if (spreadsheetTypes.includes(ext)) return <FileSpreadsheet className="w-5 h-5 text-gray-500" />;
+    if (signatureTypes.includes(ext)) return <FileSignature className="w-5 h-5 text-gray-500" />;
+    if (formTypes.includes(ext)) return <FileInput className="w-5 h-5 text-gray-500" />;
+    if (genericTypes.includes(ext)) return <FilePlus className="w-5 h-5 text-gray-500" />;
 
-  const docTypes = ["pdf", "doc", "docx", "rtf", "odt", "txt", "md"];
-  const imageTypes = ["png", "jpg", "jpeg", "gif", "bmp", "webp", "svg", "tiff", "heic"];
-  const videoTypes = ["mp4", "mov", "webm", "avi", "mkv", "flv", "wmv"];
-  const audioTypes = ["mp3", "wav", "aac", "ogg", "flac", "m4a"];
-  const codeTypes = ["html", "js", "ts", "tsx", "css", "scss", "json", "py", "java", "cpp", "c", "cs", "xml", "php", "sql", "rb", "go", "rs"];
-  const archiveTypes = ["zip", "rar", "7z", "tar", "gz", "bz2"];
-  const spreadsheetTypes = ["xls", "xlsx", "csv", "ods"];
-  const signatureTypes = ["sig", "p7s"];
-  const formTypes = ["form", "input", "output"];
-  const genericTypes = ["apk", "exe", "dmg", "iso"];
-
-  if (docTypes.includes(ext)) return <FileText className="w-5 h-5 text-gray-500" />;
-  if (imageTypes.includes(ext)) return <ImageIcon className="w-5 h-5 text-gray-500" />;
-  if (videoTypes.includes(ext)) return <Video className="w-5 h-5 text-gray-500" />;
-  if (audioTypes.includes(ext)) return <Music className="w-5 h-5 text-gray-500" />;
-  if (codeTypes.includes(ext)) return <FileCode className="w-5 h-5 text-gray-500" />;
-  if (archiveTypes.includes(ext)) return <FileArchive className="w-5 h-5 text-gray-500" />;
-  if (spreadsheetTypes.includes(ext)) return <FileSpreadsheet className="w-5 h-5 text-gray-500" />;
-  if (signatureTypes.includes(ext)) return <FileSignature className="w-5 h-5 text-gray-500" />;
-  if (formTypes.includes(ext)) return <FileInput className="w-5 h-5 text-gray-500" />;
-  if (genericTypes.includes(ext)) return <FilePlus className="w-5 h-5 text-gray-500" />;
-
-  return <FileText className="w-5 h-5 text-gray-500" />;
-};
+    return <FileText className="w-5 h-5 text-gray-500" />;
+  };
 
   return (
     <div className="w-full px-4 py-6">
@@ -128,60 +233,58 @@ const renderFileIcon = (file: File | string | null) => {
 
       {/* Show project cards if available */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
-        {projects.map((project) => (
-          <div key={project.id} className="w-full max-w-sm bg-white rounded-2xl shadow-md overflow-hidden relative">
-            {/* <img className="w-full h-48 object-cover rounded-t-2xl" src={project.imageUrl} alt={project.title} /> */}
-            <img
-        className="w-full h-48 object-cover rounded-t-2xl"
-        src={project.imageUrl || "/placeholder-image.jpg"}
-        alt={project.title}
-      />
+      {projects.map((project) => (
+        <div key={project.id} className="w-full max-w-sm bg-white rounded-2xl shadow-md overflow-hidden relative">
+          <img
+            className="w-full h-48 object-cover rounded-t-2xl"
+            src={project.imageUrl || "/"}
+            alt={project.title}
+          />
 
-            <div className="p-4">
-              <h3 className="text-lg font-semibold text-blue-600">{project.title}</h3>
-              <p className="text-sm text-gray-500 mt-1 line-clamp-2">{project.description}</p>
+          <div className="p-4">
+            <h3 className="text-lg font-semibold text-blue-600">{project.title}</h3>
+            <p className="text-sm text-gray-500 mt-1 line-clamp-2">{project.description}</p>
 
-              <div className="flex items-center justify-between mt-2 text-gray-600 font-medium text-sm">
-                <div className="flex items-center gap-3">
-                  <ClapButton />
-                  <span>{project.claps} claps</span>
+            <div className="flex items-center justify-between mt-2 text-gray-600 font-medium text-sm">
+              <div className="flex items-center gap-3">
+                <ClapButton />
+                <span>{project.claps} claps</span>
+              </div>
+
+              {project.proof && (
+                <div className="flex items-center gap-1">
+                  {renderFileIcon(project.proof)}
+                  <span className="capitalize">
+                    {typeof project.proof === "string"
+                      ? getFileExtension(project.proof)
+                      : getFileExtension(project.proof.name)}
+                  </span>
                 </div>
+              )}
+            </div>
 
-                {project.proof && (
-                  <div className="flex items-center gap-1">
-                    {renderFileIcon(project.proof)}
-                    <span className="capitalize">
-                      {typeof project.proof === "string"
-                        ? getFileExtension(project.proof)
-                        : getFileExtension(project.proof.name)}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <div className="absolute top-3 right-3">
+            <div className="absolute top-3 right-3">
               <button onClick={() => toggleDropdown(project.id)} className="p-1 rounded hover:bg-gray-100">
-                  <MoreVertical className="w-5 h-5" />
-                </button>
-                {activeDropdown === project.id && (
-                  <div className="absolute right-0 mt-2 w-28 bg-white shadow-md rounded-md z-10">
-                    <button onClick={() => handleEdit(project)} className="w-full text-left px-4 py-2 hover:bg-gray-100">
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(project.id)}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
-              </div>
+                <MoreVertical className="w-5 h-5" />
+              </button>
+              {activeDropdown === project.id && (
+                <div className="absolute right-0 mt-2 w-28 bg-white shadow-md rounded-md z-10">
+                  <button onClick={() => handleEdit(project)} className="w-full text-left px-4 py-2 hover:bg-gray-100">
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(project.id)}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500"
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
+    </div>
     </div>
   );
 }
-

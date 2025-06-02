@@ -53,7 +53,7 @@ const ImpactZonesTab = () => {
       });
 
       // Fetch the saved data after saving
-      fetchImpacts(); // Refetch impacts after saving
+      //fetchImpacts(); // Refetch impacts after saving
     } catch (error) {
       console.error("Error during save or fetch:", error);
     }
@@ -96,24 +96,24 @@ const ImpactZonesTab = () => {
     }
   }, []);
 
-  const fetchImpacts = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get(
-        `https://wooble.io/api/portfolio/fetch_impacts.php?user_id=${user_id}`
-      );
-      if (response.data.success) {
-        setImpacts(response.data.impacts);
-      } else {
-        console.warn("No impacts data.");
-        setImpacts([]);
-      }
-    } catch (error) {
-      console.error("Error fetching impacts:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchImpacts = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const response = await axios.get(
+  //       `https://wooble.io/api/portfolio/fetch_impacts.php?user_id=${user_id}`
+  //     );
+  //     if (response.data.success) {
+  //       setImpacts(response.data.impacts);
+  //     } else {
+  //       console.warn("No impacts data.");
+  //       setImpacts([]);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching impacts:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   useEffect(() => {
     const fetchImpacts = async () => {
@@ -180,7 +180,7 @@ const ImpactZonesTab = () => {
                       ? `data:image/jpeg;base64,${item.image}`
                       : item.image // this might be a full external URL if applicable
                       ? sanitizeMediaUrl(item.image) // this should build the actual wooble.org/dms/... path
-                      : "/default-image.jpg" // fallback to public/default-image.jpg
+                       : "/ "// : "/default-image.jpg" // fallback to public/default-image.jpg
                   }
                   alt={item.title || "Default Image"} // Add alt for better accessibility
                   className="w-full h-full object-cover rounded-t-2xl"

@@ -305,104 +305,65 @@ const impactsData = [
 ];
 
 function Page() {
-  // Mock profile data (replace with real data in production)
   const profile = mockProfile;
-  // 👉 Count the number of valid (truthy) social links in the profile
+  // State: Social icon size based on number of social links
   const socialCount = Object.values(profile.socials || {}).filter(Boolean).length;
-  // 👉 Determine icon size class based on number of social links
   const iconSizeClass = socialCount <= 3 ? 'w-8 h-8' : 'w-5 h-5';
-  // 🔽------------------- Skills Popup State -------------------🔽
-  // 👉 State to control visibility of Skills popup
+  // State: Skills popup
   const [isSkillsPopupOpen, setIsSkillsPopupOpen] = useState(false);
-  // 🔼------------------- End Skills Popup State -------------------🔼
-  // 🔽------------------- Tab Navigation State -------------------🔽
-  // 👉 State to track which tab is active (default: 'Projects')
+  // State: Active tab (Projects, Timeline, etc.)
   const [activeTab, setActiveTab] = useState('Projects');
-  // 🔼------------------- End Tab Navigation State -------------------🔼
-  // 🔽------------------- Follow/Unfollow State -------------------🔽
+  // State: Follow/Unfollow button
   const [isFollowing, setIsFollowing] = useState(false);
-  // 🔼------------------- End Follow/Unfollow State -------------------🔼
-  // 🔽------------------- Dropdown Menu State -------------------🔽
+  // State: Dropdown menu
   const [isDropdownOpen, setDropdownOpen] = useState(false);
-  // 👉 State to hold dropdown items fetched from API
   const [dropdownItems, setDropdownItems] = useState<{ action: string; text: string }[]>([]);
-  // 👉 State to control visibility of confirmation modal
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  // 👉 State to control visibility of reconfirmation modal
-  const [isReConfirmModalOpen, setIsReConfirmModalOpen] = useState(false);
-  // 👉 State to hold the selected action and text for confirmation
-  const [selectedAction, setSelectedAction] = useState<{ action: string; text: string } | null>(null);
-  // 🔼------------------- End Dropdown Menu State -------------------🔼
-  // 🔼------------------- End Guest Name State -------------------🔼
-  // 🔽------------------- Dropdown Items Fetching State -------------------🔽
   const [dropdownLoaded, setDropdownLoaded] = useState(false);
-  // 🔼------------------- End Dropdown Items Fetching State -------------------🔼
-  // 🔽------------------- Fetch Dropdown Items Function -------------------🔽
-  // 👉 Function to fetch dropdown items from the API
-  // 🔽------------------- Fetch Dropdown Items Function -------------------🔽
-  // 👉 Function to fetch dropdown menu items dynamically from API
-const fetchDropdownItems = async () => {
-  try {
-    // 👉 Create a new FormData object to send data as multipart/form-data
-    const formData = new FormData();
-    // 👉 Append the logged-in user ID to the form data (replace '9168' with dynamic ID in production)
-    formData.append('logged_in_user_id', '9168');
-    // 👉 Append the guest user ID to the form data (replace '1' with dynamic ID in production)
-    formData.append('guest_user_id', '1');
-    // 👉 Make a POST request to the Wooble API to get dropdown items
-    const res = await fetch('https://wooble.io/api/portfolio/get_dropdown_items.php', {
-      method: 'POST',        // Use POST method
-      body: formData,        // Send form data in the request body
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  // State: Confirmation modals
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isReConfirmModalOpen, setIsReConfirmModalOpen] = useState(false);
+  const [selectedAction, setSelectedAction] = useState<{ action: string; text: string } | null>(null);
+  // Fetch dropdown items from Wooble API
+  const fetchDropdownItems = async () => {
+    try {
+      const formData = new FormData();
+      formData.append('logged_in_user_id', '9168'); // Replace with dynamic ID
+      formData.append('guest_user_id', '1');        // Replace with dynamic ID
+
+      const res = await fetch('https://wooble.io/api/portfolio/get_dropdown_items.php', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data?.status === 'success' && Array.isArray(data.items)) {
+        setDropdownItems(data.items);
+        setDropdownLoaded(true);
+      } else {
+        console.error('Failed to fetch dropdown items:', data);
+      }
+    } catch (err) {
+      console.error('API error:', err);
+    }
+  };
+  // Toggle dropdown visibility and load items if needed
+  const handleDropdownToggle = () => {
+    setDropdownOpen(prev => {
+      const willOpen = !prev;
+      if (willOpen && !dropdownLoaded) fetchDropdownItems();
+      return willOpen;
     });
-    // 👉 Parse the JSON response from the API
-    const data = await res.json();
-    // ✅ If the response is successful and contains items
-    if (data?.status === 'success' && Array.isArray(data.items)) {
-      // 👉 Update the dropdown items state with received items
-      setDropdownItems(data.items);
-      // 👉 Mark dropdown as loaded to prevent duplicate fetches
-      setDropdownLoaded(true);
-    } else {
-      // ❌ Log error if response format is invalid or status is not success
-      console.error('Failed to fetch dropdown items:', data);
+  };
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
     }
-  } catch (err) {
-    // ❌ Catch and log any network or runtime error during fetch
-    console.error('API error:', err);
-  }
-};
-// 🔼------------------- End Fetch Dropdown Items Function -------------------🔼
-// 🔽------------------- Handle Dropdown Toggle -------------------🔽
-// 👉 Function to toggle dropdown visibility and conditionally fetch items
-const handleDropdownToggle = () => {
-  // 👉 Use previous state to toggle open/close
-  setDropdownOpen(prev => {
-    const willOpen = !prev;                 // Determine the next state
-
-    // 👉 If dropdown is about to open and not loaded yet, fetch data
-    if (willOpen && !dropdownLoaded) fetchDropdownItems();
-
-    return willOpen;                        // Return the updated open state
-  });
-};
-// 🔼------------------- End Handle Dropdown Toggle -------------------🔼
-// 🔽------------------- Close Dropdown on Outside Click -------------------🔽
-// 👉 Reference to the dropdown DOM element to detect outside clicks
-const dropdownRef = useRef<HTMLDivElement>(null);
-
-// 👉 Add event listener to close dropdown if user clicks outside
-useEffect(() => {
-  function handleClickOutside(event: MouseEvent) {
-    // 👉 Check if the click was outside the dropdown
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-      setDropdownOpen(false); // 👉 Close dropdown if clicked outside
-    }
-  }
-  // 👉 Attach mousedown listener when component mounts
-  document.addEventListener('mousedown', handleClickOutside);
-  // 👉 Clean up the event listener when component unmounts
-  return () => document.removeEventListener('mousedown', handleClickOutside);
-}, []);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 // 🔼------------------- End Close Dropdown on Outside Click -------------------🔼
 
   return (

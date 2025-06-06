@@ -67,7 +67,6 @@ const IconMap = {
   Pencil
 };
 
-
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('Projects');
   const [isClient, setIsClient] = useState(false);
@@ -88,7 +87,6 @@ export default function ProfilePage() {
     return [];
   });
 
-
   const [profileData, setProfileData] = useState({
     name: 'Murala Omkar',
     description: 'Passionate web developer eager to level up and build applications that address current market issues and challenges.',
@@ -96,7 +94,6 @@ export default function ProfilePage() {
     location: 'Bhubaneshwar, Odisha, India',
     about: 'Be real—share your journey, your passions, and the moments that define you. Your unique story sparks genuine connections!',
   });
-
 
 useEffect(() => {
   setIsClient(true);
@@ -149,8 +146,6 @@ useEffect(() => {
   }, []);
 
   //////////////////////////
-  
-
   const handleSaveUrl = (url: string | File | null) => {
     if (url === null) {
       setImageUrl(null);
@@ -190,7 +185,6 @@ useEffect(() => {
       show: false, 
     }));
   
-
     const uniqueLinksMap = new Map<string, { platform: string; url: string; show: boolean }>();
   
     [...socialLinks, ...formattedLinks].forEach(link => {
@@ -210,7 +204,6 @@ useEffect(() => {
     setIsSocialMediaModalOpen(false);
   };
   
-
   const handleToggleShow = (platform: string) => {
     const updatedLinks = socialLinks.map(link =>
       link.platform === platform ? { ...link, show: !link.show } : link
@@ -262,7 +255,6 @@ useEffect(() => {
             <div className="absolute -top-20 left-6 w-34 h-34 rounded-full bg-[#6154A4] border-4 border-white shadow-md flex items-center justify-center text-white text-4xl font-medium">
               M
             </div>
-
 
             {/* plus - 1 */}
             <div className="absolute right-3 mt-5 top-0 flex items-center space-x-2">

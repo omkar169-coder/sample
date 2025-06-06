@@ -66,35 +66,7 @@ export default function ProjectsTab() {
   const toggleDropdown = (id: number) => {
     setActiveDropdown(activeDropdown === id ? null : id);
   };
-
-  // useEffect(() => {
-  //   const fetchProjects = async () => {
-  //     try {
-  //         const res = await fetch("https://wooble.io/api/project/fetchProject_from_username.php", {
-  //           method: "POST",
-  //           headers: {
-  //             "Content-Type": "application/x-www-form-urlencoded",
-  //           },
-  //           body: new URLSearchParams({ username: "muralaomkar2" }),
-  //         });
-  
-  //         const data = await res.json();
-  //         console.log("API response murala:", data);
-  
-  //         if (data.success) {
-  //           console.log("Fetched projects:", data.projects);
-  //         } else {
-  //           console.error("Failed to fetch projects:", data.message);
-  //         }
-  //     } catch (error) {
-  //       console.error("Failed to fetch projects", error);
-  //     }
-  //   };
-  
-  //   fetchProjects();
-  // }, []);
-  
-  
+    
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -107,14 +79,11 @@ export default function ProjectsTab() {
         });
   
         const data = await res.json();
-  
 
         console.log("API response murala:", data);
   
         if (data.success) {
-          // console.log("Fetched projects:", data.projects);
-          // setProjects(data.data); 
-          // setProjects(data.data.projects);
+
           const projectsFromApi = data.data.projects;
           const mappedProjects = projectsFromApi.map((p: any) => ({
             id: p.project_id,
@@ -135,10 +104,8 @@ export default function ProjectsTab() {
           }));
           setProjects(mappedProjects);
         
-
         } else {
           console.error("Failed to fetch projects:", data.message);
-          // console.error("Failed to fetch projects", data.error);
         }
       } catch (error) {
         console.error("Failed to fetch projects", error);

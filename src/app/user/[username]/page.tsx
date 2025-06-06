@@ -4,21 +4,14 @@
 const Navbar = React.lazy(() => import('@/components/navbar'));
 import Image from 'next/image';
 import React from 'react';
-import {
-  FaTwitter,
-  FaLinkedin,
-  FaGithub,
-  FaFacebook,
-  FaInstagram,
-  FaYoutube,
-} from 'react-icons/fa';
+import {FaTwitter, FaLinkedin, FaGithub, FaFacebook, FaInstagram, FaYoutube, } from 'react-icons/fa';
 import { useState, useRef, useEffect } from 'react';
 import { HiOutlineBan, HiOutlineQuestionMarkCircle } from 'react-icons/hi';
 import { FaHandsClapping } from 'react-icons/fa6';
 import { FaLocationDot } from 'react-icons/fa6';
 import { MdGroups2 } from 'react-icons/md';
 
-/*  Interface defining the structure of the user profile data  */
+// /*  Interface defining the structure of the user profile data  */
 interface UserProfile {
   name: string;
   role?: string;
@@ -45,8 +38,10 @@ interface UserProfile {
 const mockProfile: UserProfile = {
   name: 'Murala Omkar',
   role: 'Mentor',
-  description: 'Co-Founder and product leader driving startup success through engineering excellence and vibrant community engagement.',
-  title: 'Co-Founder @ Infomatic Labs || Founding Eng @ Figgus78 || Product & Eng Manager @ Let\'s Code || FS Dev Intern @ Wooble || Ex-Intern @ Let\'s Code, Leoland, Vyomni',
+  description:
+    'Co-Founder and product leader driving startup success through engineering excellence and vibrant community engagement.',
+  title:
+    "Co-Founder @ Infomatic Labs || Founding Eng @ Figgus78 || Product & Eng Manager @ Let's Code || FS Dev Intern @ Wooble || Ex-Intern @ Let's Code, Leoland, Vyomni",
   location: 'Bhubaneshwar, India',
   followers: 120859,
   bannerImage: '/banner.jpeg',
@@ -68,8 +63,8 @@ const mockProfile: UserProfile = {
     'Git & GitHub',
     'MongoDB',
     'Cloud Hosting (Vercel/Netlify)',
-    'Developer Relations (DevRel)'
-  ],  
+    'Developer Relations (DevRel)',
+  ],
   aboutMe: `I’m Murala Omkar — a visionary product leader and passionate co-founder dedicated to empowering startups and developers worldwide. With a rare blend of engineering mastery and community-driven leadership, I drive innovation and growth by turning bold ideas into impactful products. My journey spans building high-performing teams, leading product strategies, and fostering thriving tech communities — all fueled by a relentless commitment to excellence and collaboration. Whether it’s fundraising, pitching to investors, or scaling product-led growth, I bring clarity, energy, and results to every challenge. Based in Bhubaneshwar, India, I’m on a mission to inspire, connect, and elevate the next wave of tech leaders.`,
   socials: {
     twitter: 'https://twitter.com/omkarmurala',
@@ -130,7 +125,8 @@ export const timeline = [
     logo: '/wooble_logo_mini.png',
     type: 'Experience',
     typeColor: 'gray',
-    description: 'Wooble is a career acceleration platform empowering students and early professionals to build proof-of-work portfolios through real-world challenges and mentorship.',
+    description:
+      'Wooble is a career acceleration platform empowering students and early professionals to build proof-of-work portfolios through real-world challenges and mentorship.',
   },
   {
     id: 11,
@@ -141,7 +137,8 @@ export const timeline = [
     logo: '/figgus.png',
     type: 'Experience',
     typeColor: 'gray',
-    description: 'Leading engineering at a healthcare startup creating doctor-backed solutions for men’s sexual wellness.',
+    description:
+      'Leading engineering at a healthcare startup creating doctor-backed solutions for men’s sexual wellness.',
   },
   {
     id: 10,
@@ -152,13 +149,14 @@ export const timeline = [
     logo: '/logo.png',
     type: 'Experience',
     typeColor: 'gray',
-    description: 'Contributed to full-stack development projects, enhancing web applications using modern frameworks and best practices.',
+    description:
+      'Contributed to full-stack development projects, enhancing web applications using modern frameworks and best practices.',
   },
   {
     id: 9,
     year: 2023,
     dateRange: '2023',
-    title: 'Let\'s Code',
+    title: "Let's Code",
     organization: 'Full Stack Developer Intern',
     logo: '/lets code.webp',
     type: 'Experience',
@@ -174,18 +172,20 @@ export const timeline = [
     logo: '/saciva.png',
     type: 'Experience',
     typeColor: 'gray',
-    description: 'Empowering students to connect, collaborate, and grow through a safe, vibrant, and purpose-driven community platform.',
+    description:
+      'Empowering students to connect, collaborate, and grow through a safe, vibrant, and purpose-driven community platform.',
   },
   {
     id: 7,
     year: 2023,
     dateRange: '2023 - Present',
-    title: 'Let\'s Code',
+    title: "Let's Code",
     organization: 'Product & Engineering Manager',
     logo: '/lets code.webp',
     type: 'Experience',
     typeColor: 'gray',
-    description: 'Leading cross-functional teams to deliver scalable tech solutions and edtech products.',
+    description:
+      'Leading cross-functional teams to deliver scalable tech solutions and edtech products.',
   },
   {
     id: 6,
@@ -196,7 +196,8 @@ export const timeline = [
     logo: '/global.jpeg',
     type: 'Education',
     typeColor: 'blue-200',
-    description: 'Pursued B.Tech in CSE & IT with a focus on full-stack development and product innovation.',
+    description:
+      'Pursued B.Tech in CSE & IT with a focus on full-stack development and product innovation.',
   },
   {
     id: 5,
@@ -207,7 +208,8 @@ export const timeline = [
     logo: '/world skills.jpg',
     type: 'Certification',
     typeColor: 'gray',
-    description: 'Represented Odisha at the national level in India Skills competition under the ("IT Software Solutions & Business")  category.',
+    description:
+      'Represented Odisha at the national level in India Skills competition under the ("IT Software Solutions & Business")  category.',
   },
   {
     id: 4,
@@ -218,7 +220,8 @@ export const timeline = [
     logo: '/india skills.png',
     type: 'Certification',
     typeColor: 'gray',
-    description: 'Awarded for outstanding performance in ("IT Software Solutions & Business") at the state-level skills competition.',
+    description:
+      'Awarded for outstanding performance in ("IT Software Solutions & Business") at the state-level skills competition.',
   },
   {
     id: 3,
@@ -229,7 +232,8 @@ export const timeline = [
     logo: '/skilled in odisha.jpeg',
     type: 'Certification',
     typeColor: 'gray',
-    description: 'Recognized as one of the top finalists in the state-wide Odisha Skills competition for ("IT Software Solutions & Business").',
+    description:
+      'Recognized as one of the top finalists in the state-wide Odisha Skills competition for ("IT Software Solutions & Business").',
   },
   {
     id: 2,
@@ -240,7 +244,8 @@ export const timeline = [
     logo: '/infomatic labs.png',
     type: 'Experience',
     typeColor: 'gray',
-    description: 'Building B2B SaaS products and empowering students through tech-driven project solutions in their careers.',
+    description:
+      'Building B2B SaaS products and empowering students through tech-driven project solutions in their careers.',
   },
   {
     id: 1,
@@ -251,8 +256,9 @@ export const timeline = [
     logo: '/images.jpeg',
     type: 'Education',
     typeColor: 'blue-200',
-    description: 'Completed Diploma in Computer Science Engineering with strong fundamentals in software development.',
-  }
+    description:
+      'Completed Diploma in Computer Science Engineering with strong fundamentals in software development.',
+  },
 ];
 
 const groupedTimeline = timeline.reduce((acc: Record<number, typeof timeline>, item) => {
@@ -299,28 +305,105 @@ const impactsData = [
 ];
 
 function Page() {
+  // Mock profile data (replace with real data in production)
   const profile = mockProfile;
+  // 👉 Count the number of valid (truthy) social links in the profile
   const socialCount = Object.values(profile.socials || {}).filter(Boolean).length;
+  // 👉 Determine icon size class based on number of social links
   const iconSizeClass = socialCount <= 3 ? 'w-8 h-8' : 'w-5 h-5';
-
-  // 🧭 State and ref for dropdown men
+  // 🔽------------------- Skills Popup State -------------------🔽
+  // 👉 State to control visibility of Skills popup
   const [isSkillsPopupOpen, setIsSkillsPopupOpen] = useState(false);
+  // 🔼------------------- End Skills Popup State -------------------🔼
+  // 🔽------------------- Tab Navigation State -------------------🔽
+  // 👉 State to track which tab is active (default: 'Projects')
   const [activeTab, setActiveTab] = useState('Projects');
-  // follow and unfollow button const
+  // 🔼------------------- End Tab Navigation State -------------------🔼
+  // 🔽------------------- Follow/Unfollow State -------------------🔽
   const [isFollowing, setIsFollowing] = useState(false);
-  // Dropdown menu state and ref
+  // 🔼------------------- End Follow/Unfollow State -------------------🔼
+  // 🔽------------------- Dropdown Menu State -------------------🔽
   const [isDropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
-      }
+  // 👉 State to hold dropdown items fetched from API
+  const [dropdownItems, setDropdownItems] = useState<{ action: string; text: string }[]>([]);
+  // 👉 State to control visibility of confirmation modal
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  // 👉 State to control visibility of reconfirmation modal
+  const [isReConfirmModalOpen, setIsReConfirmModalOpen] = useState(false);
+  // 👉 State to hold the selected action and text for confirmation
+  const [selectedAction, setSelectedAction] = useState<{ action: string; text: string } | null>(null);
+  // 🔼------------------- End Dropdown Menu State -------------------🔼
+  // 🔼------------------- End Guest Name State -------------------🔼
+  // 🔽------------------- Dropdown Items Fetching State -------------------🔽
+  const [dropdownLoaded, setDropdownLoaded] = useState(false);
+  // 🔼------------------- End Dropdown Items Fetching State -------------------🔼
+  // 🔽------------------- Fetch Dropdown Items Function -------------------🔽
+  // 👉 Function to fetch dropdown items from the API
+  // 🔽------------------- Fetch Dropdown Items Function -------------------🔽
+  // 👉 Function to fetch dropdown menu items dynamically from API
+const fetchDropdownItems = async () => {
+  try {
+    // 👉 Create a new FormData object to send data as multipart/form-data
+    const formData = new FormData();
+    // 👉 Append the logged-in user ID to the form data (replace '9168' with dynamic ID in production)
+    formData.append('logged_in_user_id', '9168');
+    // 👉 Append the guest user ID to the form data (replace '1' with dynamic ID in production)
+    formData.append('guest_user_id', '1');
+    // 👉 Make a POST request to the Wooble API to get dropdown items
+    const res = await fetch('https://wooble.io/api/portfolio/get_dropdown_items.php', {
+      method: 'POST',        // Use POST method
+      body: formData,        // Send form data in the request body
+    });
+    // 👉 Parse the JSON response from the API
+    const data = await res.json();
+    // ✅ If the response is successful and contains items
+    if (data?.status === 'success' && Array.isArray(data.items)) {
+      // 👉 Update the dropdown items state with received items
+      setDropdownItems(data.items);
+      // 👉 Mark dropdown as loaded to prevent duplicate fetches
+      setDropdownLoaded(true);
+    } else {
+      // ❌ Log error if response format is invalid or status is not success
+      console.error('Failed to fetch dropdown items:', data);
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  } catch (err) {
+    // ❌ Catch and log any network or runtime error during fetch
+    console.error('API error:', err);
+  }
+};
+// 🔼------------------- End Fetch Dropdown Items Function -------------------🔼
+// 🔽------------------- Handle Dropdown Toggle -------------------🔽
+// 👉 Function to toggle dropdown visibility and conditionally fetch items
+const handleDropdownToggle = () => {
+  // 👉 Use previous state to toggle open/close
+  setDropdownOpen(prev => {
+    const willOpen = !prev;                 // Determine the next state
+
+    // 👉 If dropdown is about to open and not loaded yet, fetch data
+    if (willOpen && !dropdownLoaded) fetchDropdownItems();
+
+    return willOpen;                        // Return the updated open state
+  });
+};
+// 🔼------------------- End Handle Dropdown Toggle -------------------🔼
+// 🔽------------------- Close Dropdown on Outside Click -------------------🔽
+// 👉 Reference to the dropdown DOM element to detect outside clicks
+const dropdownRef = useRef<HTMLDivElement>(null);
+
+// 👉 Add event listener to close dropdown if user clicks outside
+useEffect(() => {
+  function handleClickOutside(event: MouseEvent) {
+    // 👉 Check if the click was outside the dropdown
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      setDropdownOpen(false); // 👉 Close dropdown if clicked outside
+    }
+  }
+  // 👉 Attach mousedown listener when component mounts
+  document.addEventListener('mousedown', handleClickOutside);
+  // 👉 Clean up the event listener when component unmounts
+  return () => document.removeEventListener('mousedown', handleClickOutside);
+}, []);
+// 🔼------------------- End Close Dropdown on Outside Click -------------------🔼
 
   return (
     <div className='min-h-screen bg-gray-100 '>
@@ -438,24 +521,79 @@ function Page() {
                   <div className='relative'>
                     <button
                       className='rounded-full border bg-gray-100 px-4 py-2 text-sm'
-                      onClick={() => setDropdownOpen(prev => !prev)}
+                      onClick={handleDropdownToggle}
                     >
                       ⋮
                     </button>
 
+                    {/* ✅ Dropdown Menu */}
                     {isDropdownOpen && (
-                      <div className='absolute left-full top-1.5 z-50 ml-1 
-                      w-40 sm:w-44 md:w-48 lg:w-52 xl:w-56 2xl:w-60 
-                      max-w-[90vw]
-                      rounded-md border bg-white shadow-lg'>
-                        <button className='flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100'>
-                          <HiOutlineBan className='h-5 w-5 text-red-500' />
-                          Block User
-                        </button>
-                        <button className='flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100'>
-                          <HiOutlineQuestionMarkCircle className='h-5 w-5 text-blue-500' />
-                          Ask Question
-                        </button>
+                      <div
+                        className='absolute left-full top-1.5 z-50 ml-1 
+                        w-40 max-w-[90vw] rounded-md border bg-white shadow-lg 
+                        sm:w-44 md:w-48 lg:w-52 xl:w-56 2xl:w-60'
+                      >
+                        {/* Dropdown items */}
+                        {dropdownItems.map((item, index) => (
+                          <button
+                            key={index}
+                            className='flex w-full items-center gap-2 px-3 py-2 text-sm hover:bg-gray-100'
+                            // onClick={() => console.log('Action:', item.action)} // Replace this with actual logic
+                            onClick={() => {
+                              setSelectedAction(item);
+                              setIsConfirmModalOpen(true); // ✅ only open first modal
+                              setDropdownOpen(false);
+                            }}
+                          >
+                            {item.action === 'block' && (
+                              <HiOutlineBan className='h-5 w-5 text-red-500' />
+                            )}
+                            {item.action === 'ask' && (
+                              <HiOutlineQuestionMarkCircle className='h-5 w-5 text-blue-500' />
+                            )}
+                            {item.text}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {/* ✅ End Dropdown */}
+                    {/* 📝 Confirm Modal */}
+                    {isConfirmModalOpen && selectedAction && (
+                      <div className='fixed inset-0 z-50 flex items-center justify-center bg-opacity-40 backdrop-blur-sm'>
+                        <div className='w-[90%] max-w-md rounded-lg bg-white p-6 shadow-xl'>
+                          <div className='mb-4 flex items-center justify-between'>
+                            <h2 className='text-lg font-semibold'>Confirm Action</h2>
+                            <button
+                              onClick={() => setIsConfirmModalOpen(false)}
+                              className='text-xl text-gray-500 hover:text-black'
+                            >
+                              &times;
+                            </button>
+                          </div>
+
+                          <p className='mb-6 text-sm text-gray-800'>
+                            Are you sure you want to block this profile user
+                          </p>
+
+                          <div className='flex justify-end gap-4'>
+                            <button
+                              className='text-sm text-gray-600 hover:text-black'
+                              onClick={() => setIsConfirmModalOpen(false)}
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              className='rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700'
+                              onClick={() => {
+                                console.log('Confirmed:', selectedAction.action);
+                                setIsConfirmModalOpen(false); // close first modal
+                                setIsReConfirmModalOpen(true); // open second modal
+                              }}
+                            >
+                              YES
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -575,69 +713,77 @@ function Page() {
           )}
 
           {/* 📅 Timeline Section */}
+            {activeTab === 'Timeline' && (
+              <div className='relative px-4 py-10 sm:px-6 md:px-8 lg:px-10 xl:px-16 2xl:px-20'>
+                {/* Timeline vertical line */}
+                <div className='absolute bottom-0 left-6 top-0 w-0.5 bg-gray-300 sm:left-8 md:left-10 lg:left-[2.75rem] xl:left-[3rem] 2xl:left-[3.5rem]'></div>
 
-          {activeTab === 'Timeline' && (
-            <div className='relative px-4 py-10 sm:px-6 md:px-8 lg:px-10 xl:px-16 2xl:px-20'>
-              {/* Timeline vertical line */}
-              <div className='absolute left-6 sm:left-8 md:left-10 lg:left-[2.75rem] xl:left-[3rem] 2xl:left-[3.5rem] top-0 bottom-0 w-0.5 bg-gray-300'></div>
+                {sortedYears.map(year => (
+                  <div key={year} className='relative mb-12 pl-12 sm:pl-16 md:pl-20 lg:pl-24'>
+                    {/* Year Label */}
+                    <div className='absolute -left-3 top-0 bg-white px-2 text-base font-bold text-gray-700 sm:-left-6 sm:text-lg'>
+                      {year}
+                    </div>
 
-              {sortedYears.map((year) => (
-                <div key={year} className='relative mb-12 pl-12 sm:pl-16 md:pl-20 lg:pl-24'>
-                  {/* Year Label */}
-                  <div className='absolute -left-3 top-0 bg-white px-2 text-base font-bold text-gray-700 sm:-left-6 sm:text-lg'>
-                    {year}
-                  </div>
-
-                  {/* Entries for the year */}
-                  {groupedTimeline[year].map((entry) => (
-                    <div key={entry.id} className='relative mb-10'>
-                      {/* Dot with ID */}
-                      <div className='absolute top-8 -left-10 sm:-left-14 md:-left-18 lg:-left-[5.75rem] xl:-left-[7rem] 2xl:-left-[7.5rem]
-                                  -translate-x-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-black text-xs font-bold text-white shadow'
+                    {/* Entries for the year */}
+                    {groupedTimeline[year].map(entry => (
+                      <div
+                        key={entry.id}
+                        className='relative mb-10 animate-fadeInUp'
                       >
-                        {entry.id}
-                      </div>
-                      {/* Card */}
-                      <div className='w-full rounded-xl bg-white p-4 shadow-md sm:max-w-full md:max-w-2xl'>
-                        <div className='mb-2 flex flex-col sm:flex-row sm:items-center sm:gap-4'>
-                          {/* Logo */}
-                          <img
-                            src={entry.logo}
-                            alt={entry.title}
-                            className='mb-2 h-20 w-auto rounded object-contain sm:mb-0 sm:h-16 sm:w-28'
-                          />
-                          {/* Text Info */}
-                          <div className='flex-1'>
-                            <p className='text-xs text-gray-500 sm:text-sm'>{entry.dateRange}</p>
-                            <h4 className='text-base font-semibold text-gray-900 sm:text-lg'>
-                              {entry.title}
-                            </h4>
-                            <p className='text-sm text-gray-700'>{entry.organization}</p>
+                        {/* Dot with ID */}
+                        <div
+                          className='md:-left-18 absolute -left-10 top-8 flex h-6 w-6 -translate-x-1/2
+                          items-center justify-center rounded-full bg-black text-xs font-bold text-white shadow sm:-left-14 lg:-left-[5.75rem] xl:-left-[7rem] 2xl:-left-[7.5rem]
+                          transition-transform duration-300 ease-out hover:scale-105'
+                        >
+                          {entry.id}
+                        </div>
+
+                        {/* Card */}
+                        <div className='w-full rounded-xl bg-white p-4 shadow-md sm:max-w-full md:max-w-2xl transition-all duration-500 ease-in-out hover:shadow-lg'>
+                          <div className='mb-2 flex flex-col sm:flex-row sm:items-center sm:gap-4'>
+                            {/* Logo */}
+                            <img
+                              src={entry.logo}
+                              alt={entry.title}
+                              className='mb-2 h-20 w-auto rounded object-contain sm:mb-0 sm:h-16 sm:w-28 transition duration-300 ease-in-out hover:scale-105'
+                            />
+                            {/* Text Info */}
+                            <div className='flex-1 transition-opacity duration-300'>
+                              <p className='text-xs text-gray-500 sm:text-sm'>{entry.dateRange}</p>
+                              <h4 className='text-base font-semibold text-gray-900 sm:text-lg'>
+                                {entry.title}
+                              </h4>
+                              <p className='text-md font-bold text-green-800'>{entry.organization}</p>
+                            </div>
+                          </div>
+
+                          {/* Type Badge + Description */}
+                          <div className='mt-2 space-y-1 pl-2 sm:ml-0 md:pl-32'>
+                            <span
+                              className={`inline-block rounded-full px-2 py-1 text-xs transition-all duration-300 ${
+                                entry.type === 'Education'
+                                  ? 'bg-red-100 text-red-700'
+                                  : entry.type === 'Experience'
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : entry.type === 'Certification'
+                                      ? 'bg-green-100 text-green-700'
+                                      : 'bg-gray-300 text-gray-800'
+                              }`}
+                            >
+                              {entry.type}
+                            </span>
+                            <p className='text-sm text-gray-800'>{entry.description}</p>
                           </div>
                         </div>
-
-                        {/* Type Badge + Description */}
-                        <div className='mt-2 space-y-1 sm:ml-0 pl-2 md:pl-32'>
-                          <span
-                            className={`inline-block rounded-full px-2 py-1 text-xs ${
-                              entry.typeColor === 'red'
-                                ? 'bg-red-100 text-red-600'
-                                : entry.typeColor === 'blue-200'
-                                ? 'bg-blue-200 text-blue-800'
-                                : 'bg-gray-300 text-gray-800'
-                            }`}
-                          >
-                            {entry.type}
-                          </span>
-                          <p className='text-sm text-gray-800'>{entry.description}</p>
-                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          )}
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+
 
           {/* start of impacts */}
 
@@ -650,12 +796,7 @@ function Page() {
                 >
                   {/* 🖼️ Image section */}
                   <div className='relative h-40 w-full'>
-                    <Image
-                      src={impact.image}
-                      alt='Impact event'
-                      fill
-                      className='object-cover'
-                    />
+                    <Image src={impact.image} alt='Impact event' fill className='object-cover' />
                     <span className='absolute left-3 top-3 rounded bg-white bg-opacity-70 px-2 py-1 text-sm font-semibold text-gray-700'>
                       {impact.date}
                     </span>
@@ -686,4 +827,3 @@ function Page() {
 }
 
 export default Page;
-
